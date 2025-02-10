@@ -1,7 +1,7 @@
 {
   "name": "pythias-internal-server",
   "productName": "pythias-internal-server",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "pythias internal server for file transfer and printer control",
   "type": "module",
   "main": "src/index.js",
@@ -47,6 +47,11 @@
     "ipp": "^2.0.1",
     "pdf-to-printer": "^5.6.0",
     "plist": "^3.1.0",
+    "update-electron-app": "^3.1.1",
     "xmldom": "^0.6.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mthero24/pythias-electon-apps"
   }
 }

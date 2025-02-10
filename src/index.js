@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import os from "os";
 import pkg from "pdf-to-printer";
+
 let {print} = pkg
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,6 +17,8 @@ import express from "express";
 import bodyParser from "body-parser";
 import apiRoutes from "./routes/api.js"
 import uiRoutes from "./routes/ui.js"
+import update from "./functions/update.cjs"
+update();
 const desktopPath = os.homedir() + "/Documents/hotfolder/";
 const publicDirectoryPath = path.join(__dirname, "public");
 let lastFileWritten = "Waiting for file to write";
@@ -46,9 +49,9 @@ const createWindow = async () => {
   const mainWindow = new BrowserWindow({
     width: 1000,
     height: 1500,
-    //fullscreen: true,
+    fullscreen: true,
     //autoHideMenuBar: true,
-    //kiosk: true,
+    kiosk: true,
     //skipTaskbar: true,
     icon: path.join(__dirname, '/public/logo-dark-400-greenbg.png'),
     webPreferences: {
@@ -59,7 +62,20 @@ const createWindow = async () => {
 
   // and load the index.html of the app.
   mainWindow.loadURL("http://localhost:3005");
+  
+  mainWindow.on("minimize", function (event) {
+    event.preventDefault();
+    mainWindow.hide();
+  });
+  
+  mainWindow.on("close", function (event) {
+    if (!application.isQuiting) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
 
+    return false;
+  });
   // Open the DevTools.
   //mainWindow.webContents.openDevTools();
   // const printers = await mainWindow.webContents.getPrintersAsync();

@@ -1,5 +1,3 @@
-import users from "../users.json" with {type: "json"};
-import apiKey from "../apiKeys.json" with { type: "json" };
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "node:path";
@@ -7,8 +5,34 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-let useUsers = users
-let useApiKey = apiKey
+let users
+let apiKeys
+let useUsers = {}
+let useApiKey = {}
+try {
+  fs.readFile(path.join(__dirname, "../users.json"), "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading file:", err);
+    } else {
+      console.log("File content:", data);
+      useUsers = JSON.parse(data);
+    }
+  });
+} catch (e) {
+  console.log("no settings");
+}
+try {
+  fs.readFile(path.join(__dirname, "../apikeys.json"), "utf8", (err, data) => {
+    if (err) {
+      console.error("Error reading file:", err);
+    } else {
+      console.log("File content:", data);
+      useApiKey = JSON.parse(data);
+    }
+  });
+} catch (e) {
+  console.log("no settings");
+}
 function generateRandomCharacter() {
    const characters ="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@!#$%^&*";
     return characters.charAt(Math.floor(Math.random() * characters.length));
