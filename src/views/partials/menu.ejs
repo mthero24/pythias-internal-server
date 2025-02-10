@@ -1,0 +1,22 @@
+<nav class="" style="background: #b4d6b4;">
+    <div class="row">
+    <div class="col-sm-3" style="padding:1%;">
+        <div><a class="" href="/?key=<%=key%>"><img src="/logo-dark-100.png" alt="logo" width="100" height="auto" style="margin-left: 20%;"/></a></div>
+    </div>
+    <div class="col-sm-6 ">
+    </div>
+    <div class="col-sm-3 ">
+        <div style="margin-top: 5%; padding: 2%">
+            <p style="color: #332c2c; font-size: 2rem; text-align: right; margin-right: 20%">
+                <a href="/settings?key=<%=key%>"><i class="fa-solid fa-gear" style="color: #332c2c; font-size: 2rem; text-align: right;"></i></a>
+                <%_if(key){_%>
+                    <a href="/account?key=<%=key%>"><i class="fa-solid fa-user" style="color: #332c2c; font-size: 2rem; text-align: right;"></i></a>
+                    <a href="/logout?key=<%=key%>"><i class="fa-solid fa-right-from-bracket" style="color: #332c2c; font-size: 2rem; text-align: right;"></i></a>
+                <%_}else{_%>
+                    <a href="/login?key=<%=key%>"><i class="fa-solid fa-user" style="color: #332c2c; font-size: 2rem; text-align: right;"></i></a>
+                <%_}_%>
+            </p>
+        </div>
+    </div>
+    </div>
+</nav>

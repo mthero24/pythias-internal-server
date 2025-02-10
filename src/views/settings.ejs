@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>internal server</title>
+    <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+  </head>
+  <body style="background: #faf9f9">
+    <%- include('partials/menu.ejs') %>
+    <div class="container-fluid">
+        <div class="row" style="margin-top: 2%;">
+          <div class="col-sm-6 col-md-4">
+            <h2 style="font-size: 1.2rem; text-align: center;">Shipping Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%">
+              <div class="card-body">
+                <h6 class="card-title" style="text-align: center;">Printers</h2>
+                <div id="shipping-printers">
+                  <%_ for(let s of Object.keys(settings.shipping.printers)){_%>
+                      <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                        <p><%=s%>: <%=settings.shipping.printers[s]%></p>
+                        <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('shipping-printers', '<%=s%>', '<%=settings.shipping.printers[s]%>')"></i> 
+                        <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('shipping-printers', '<%=s%>')"></i>
+                      </div>
+                  <%_}_%>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="shipping-printers-input" aria-describedby="basic-addon2">
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="shipping-printers-button" style="cursor: pointer" onclick="save('shipping-printers')">Add Printer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" style="width: 100%; margin-bottom: 1%">
+              <div class="card-body">
+                <h6 class="card-title" style="text-align: center;">Scales</h2>
+                <div id="shipping-scales">
+                  <%_ for(let s of Object.keys(settings.shipping.scales)){_%>
+                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                      <p><%=s%>: <%=settings.shipping.scales[s]%></p>
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('shipping-scales', '<%=s%>', '<%=settings.shipping.scales[s]%>')"></i> 
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('shipping-scales', '<%=s%>')"></i>
+                    </div>
+                <%_}_%>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="shipping-scales-input" aria-describedby="basic-addon2">
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="shipping-scales-button" style="cursor: pointer" onclick="save('shipping-scales')">Add Printer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-4 ">
+            <h2 style="font-size: 1.2rem; text-align: center;">DTF Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%">
+              <div class="card-body">
+                <h6 class="card-title" style="text-align: center;">Printers</h2>
+                <div id="dtf">
+                  <%_ for(let s of Object.keys(settings.dtf)){_%>
+                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                      <p><%=s%>: <%=settings.dtf[s]%></p>
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('dtf', '<%=s%>', '<%=settings.dtf[s]%>')"></i> 
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('dtf', '<%=s%>')"></i>
+                    </div>
+                <%_}_%>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="dtf-input" aria-describedby="basic-addon2">
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="dtf-button" style="cursor: pointer" onclick="save('dtf')">Add Printer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-4 ">
+            <h2 style="font-size: 1.2rem; text-align: center;">ROQ Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%">
+              <div class="card-body">
+                <h6 class="card-title" style="text-align: center;">Folders</h2>
+                <div id="roq">
+                  <%_ for(let s of Object.keys(settings.roq)){_%>
+                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                      <p><%=s%>: <%=settings.roq[s]%></p>
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('roq', '<%=s%>', '<%=settings.roq[s]%>')"></i> 
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('roq', '<%=s%>')"></i>
+                    </div>
+                <%_}_%>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="roq-input" aria-describedby="basic-addon2">
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="roq-button" style="cursor: pointer" onclick="save('roq')">Add Printer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-4 ">
+            <h2 style="font-size: 1.2rem; text-align: center;">Label Printer Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%">
+              <div class="card-body">
+                <h6 class="card-title" style="text-align: center;">Printers</h2>
+                <div id="labelPrinters">
+                  <%_ for(let s of Object.keys(settings.labelPrinters)){_%>
+                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                      <p><%=s%>: <%=settings.labelPrinters[s]%></p>
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('labelPrinters', '<%=s%>', '<%=settings.labelPrinters[s]%>')"></i> 
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('labelPrinters', '<%=s%>')"></i>
+                    </div>
+                <%_}_%>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="labelPrinters-input" aria-describedby="basic-addon2">
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="labelPrinters-button" style="cursor: pointer" onclick="save('labelPrinters')">Add Printer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-4 ">
+            <h2 style="font-size: 1.2rem; text-align: center;">Sublimation Printer Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%">
+              <div class="card-body">
+                <h6 class="card-title" style="text-align: center;">Printers</h2>
+                <div id="sublimation">
+                  <%_ for(let s of Object.keys(settings.sublimation)){_%>
+                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                      <p><%=s%>: <%=settings.sublimation[s]%></p>
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('sublimation', '<%=s%>', '<%=settings.sublimation[s]%>')"></i> 
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('sublimation', '<%=s%>')"></i>
+                    </div>
+                <%_}_%>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="sublimation-input" aria-describedby="basic-addon2">
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="sublimation-button" style="cursor: pointer" onclick="save('sublimation')">Add Printer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-4 ">
+            <h2 style="font-size: 1.2rem; text-align: center;">DTG Printer Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%">
+              <div class="card-body">
+                <h6 class="card-title" style="text-align: center;">Printers</h2>
+                <div id="dtgPrinters">
+                  <%_ for(let s of Object.keys(settings.dtgPrinters)){_%>
+                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                      <p><%=s%>: <%=settings.dtgPrinters[s]%></p>
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('dtgPrinters', '<%=s%>', '<%=settings.dtgPrinters[s]%>')"></i> 
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('dtgPrinters', '<%=s%>')"></i>
+                    </div>
+                <%_}_%>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="dtgPrinters-input" aria-describedby="basic-addon2">
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="dtgPrinters-button" style="cursor: pointer" onclick="save('dtgPrinters')">Add Printer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+      let settings = JSON.parse('<%-JSON.stringify(settings)%>')
+      let key = '<%=key%>'
+      let editParam
+      let edit = (type, param, ip)=>{
+        editParam = param
+        document.getElementById(`${type}-input`).value = ip
+        console.log(`${type}-button`)
+        document.getElementById(`${type}-button`).innerText = `Edit ${param}`
+      }
+      const updateServer = async (settings)=>{
+        console.log("updateServer")
+        let res = await axios.post("/update-settings", {settings, key})
+        //console.log(res.data)
+        if(res.data.error) {
+          alert(res.data.msg)
+          if(res.data.msg == "invalid key") location.href = "/login"
+        }
+        else console.log("updated")
+      }
+      let save = (type) =>{
+        let param
+        if(editParam){
+          param = editParam
+        }else{
+          let sp = type.split("-")
+          let l = sp.length
+          let next = Object.keys(l == 1? settings[sp[0]]: settings[sp[0]][sp[1]]).length + 1
+          //console.log(Object.keys(settings[sp[0]][sp[1]])[0])
+          param = Object.keys(l == 1? settings[sp[0]]: settings[sp[0]][sp[1]]).length == 0? sp.length == 2? "station1": "printer1": l == 1? Object.keys(settings[sp[0]][sp[1]])[0].replace("1", next): Object.keys(settings[sp[0]][sp[1]])[0].replace("1", next)
+        }
+        let sp = type.split("-")
+        let l = sp.length
+        if(l == 1){
+          settings[sp[0]][param] = document.getElementById(`${type}-input`).value
+        }else if(l == 2){
+          settings[sp[0]][sp[1]][param] = document.getElementById(`${type}-input`).value
+        }
+        //update settings
+        updatePage(sp, l, type)
+        updateServer(settings)
+        document.getElementById(`${type}-input`).value = ""
+        document.getElementById(`${type}-button`).innerText = "Add Printer"
+
+        //update screen
+        editParam = null
+      }
+      const updatePage = (sp, l, type)=>{
+        let html = ""
+        if(l == 1){
+          for(let s of Object.keys(settings[sp[0]])){
+            if(settings[sp[0]][s] != undefined){
+              html += `
+                <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                  <p>${s}: ${settings[sp[0]][s]}</p>
+                  <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('${sp[0]}', '${s}', '${settings[sp[0]][s]}')"></i> 
+                  <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left"></i>
+                </div>
+              `
+            }
+          }
+        }else if(l == 2){
+          for(let s of Object.keys(settings[sp[0]][sp[1]])){
+            if(settings[sp[0]][sp[1]][s] != undefined){
+              html += `
+                <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                  <p>${s}: ${settings[sp[0]][sp[1]][s]}</p>
+                  <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('${sp[0]}-${sp[1]}', '${s}', '${settings[sp[0]][sp[1]][s]}')"></i> 
+                  <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left"></i>
+                </div>
+              `
+            }
+          }
+        }
+        document.getElementById(type).innerHTML = html
+      }
+      const del = (type, param)=>{
+        console.log("del")
+        let sp = type.split("-")
+        let l = sp.length
+        if(l == 1){
+          let newO = {}
+          for(let s of Object.keys(settings[sp[0]])){
+            if(s !== param) newO[s] = settings[sp[0]][s]
+          }
+          settings[sp[0]] = newO
+        }else if(l == 2){
+          let newO = {}
+          for(let s of Object.keys( settings[sp[0]][sp[1]])){
+            if(s !== param) newO[s] =  settings[sp[0]][sp[1]][s]
+          }
+          settings[sp[0]][sp[1]] = newO
+        }
+        updatePage(sp, l, type)
+        updateServer(settings)
+      }
+    </script>
+  </body>
+</html>
