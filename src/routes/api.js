@@ -25,7 +25,8 @@ router.post("/dtf", checkKeys, async (req,res)=>{
     let resData
     console.log(data)
     addOutput(`Sent image to DTF Printer PieceID: ${data.sku}`)
-    let resp = await axios.post(`http://${settings.dtf[data.printer]}/`, {...data}).catch(e=>{resData = e.response.data})
+    addOutput(`http://${settings.dtf[data.printer]}/`)
+    let resp = await axios.post(`http://${settings.dtf[data.printer]}:3500/`, {...data}).catch(e=>{resData = e.response.data})
     if (resp) return res.send(resp.data);
     else if (resData) {
       addOutput(`Error writing image on DTF Printer PieceID: ${data.sku}`)
@@ -41,14 +42,24 @@ router.post("/roq-folder", checkKeys, async (req, res) => {
   const settings = getSettings();
   let data = req.body;
   let resData;
+  addOutput(`Sent image to DTF Printer PieceID: ${data.sku}`)
+  console.log(settings["roq"]["roq1"])
+  addOutput(`http://${settings["roq"]["roq1"]}:3500/roq`)
   let resp = await axios
-    .post(`http://${settings[roq][data.roq]}:3500/roq`, { ...data })
+    .post(`http://${settings["roq"]["roq1"]}:3500/roq`, { ...data })
     .catch((e) => {
+      console.log("catch", e)
       resData = e.response?.data;
     });
   if (resp) return res.send(resp?.data);
-  else if (resData) return res.send(resData);
+  else if (resData) {
+    console.log(resData)
+    addOutput(`Error writing image on ROQ  PieceID: ${data.sku}`)
+    return res.send(resData);
+  }
   else
+
+    addOutput(`Error writing image on ROQ  PieceID: ${data.sku}`)
     return res.send({
       error: true,
       msg: "Could not reach file writer!",
@@ -58,13 +69,20 @@ router.post("/shipping/printers", checkKeys, async (req, res) => {
   const settings = getSettings();
   let data = req.body;
   console.log(data.type, "type route");
-  let resp = await print({
-    label: data.label,
-    printer: `http://${settings.shipping.printers[data.station]}:631/ipp/port1`,
-    type: data.type,
-  });
-  console.log(resp, "route");
-  return res.send(resp);
+  try{
+    addOutput(`print label : ${data.station} ${data.type}`)
+    console.log(`http://${settings.shipping.printers[data.station]}:631/ipp/port1`)
+    let resp = await print({
+      label: data.label,
+      printer: `http://${settings.shipping.printers[data.station]}:631/ipp/port1`,
+      type: data.type,
+    });
+    console.log(resp, "route");
+    return res.send(resp);
+  }catch(e){
+    addOutput(`error printing label : ${data.station} ${data.type} ${JSON.stringify(e)} ${e}`)
+    return res.send({error: true, msg: `error printing label : ${data.station} ${data.type} ${JSON.stringify(e)} ${e}`})
+  }
 });
 router.get("/shipping/scales", checkKeys, async (req, res) => {
   const settings = getSettings();

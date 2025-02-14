@@ -77,7 +77,7 @@ const createWindow = async () => {
     return false;
   });
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
   // const printers = await mainWindow.webContents.getPrintersAsync();
   // console.log(printers);
   // print(path.join(__dirname, "/assets/DecisionLetter20250129082714.pdf"), {printer:"HP OfficeJet Pro 8020 series [63D443]"});

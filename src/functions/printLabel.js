@@ -3,7 +3,7 @@ import axios from "axios";
 import btoa from "btoa";
 import atob from "atob"
 export const print = async ({label, printer, type}) => {
-    console.log(type, "type")
+    console.log(type, "type", label)
     let data
     if(type == "pdf"){
         let headers = {
@@ -19,8 +19,10 @@ export const print = async ({label, printer, type}) => {
         data = res.data
         data = new Buffer.from(btoa(data), "base64")
     }else{
+        console.log(label, "before convert")
         data= new Buffer.from(label, "base64")
     }
+    console.log(printer)
     var printer = ipp.Printer(printer);
     var msg = {
         "version": "1.0",
@@ -41,7 +43,6 @@ export const print = async ({label, printer, type}) => {
                     console.log("response", res)
                     resolve({error: false, msg: "printed", res})
             }
-            console.log("printed")
         });
     })
 }

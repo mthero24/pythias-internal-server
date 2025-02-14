@@ -11,7 +11,7 @@ let addOutput = async (out)=>{
         output: out,
         time: new Date(Date.now())
     })
-    if(useOutput.length > 500) useOutput.pop()
+    if(useOutput.length > 500) useOutput.shift()
      await fs.writeFileSync(path.join(__dirname, '../logs.json'), JSON.stringify(useOutput), {encoding:'utf8',flag:'w'})
     
 }

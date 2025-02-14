@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 let users
 let apiKeys
-let useUsers = {}
+let useUsers = []
 let useApiKey = {}
 try {
   fs.readFile(path.join(__dirname, "../users.json"), "utf8", (err, data) => {

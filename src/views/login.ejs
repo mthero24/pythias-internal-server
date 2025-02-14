@@ -48,6 +48,7 @@
                 document.getElementById("password-required").style.display = "hidden"
             }
             if(document.getElementById("user-name").value !== "" && document.getElementById("password").value !== ""){
+                console.log("register", register)
                 let res = await axios.post(!register? "/register": "/login", {userName: document.getElementById("user-name").value, password: document.getElementById("password").value})
                 console.log(res.data)
                 if(res.data.error){
