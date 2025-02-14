@@ -1,7 +1,7 @@
 {
   "name": "pythias-internal-server",
   "productName": "pythias-internal-server",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "pythias internal server for file transfer and printer control",
   "type": "module",
   "main": "src/index.js",
