@@ -1,38 +1,43 @@
 import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "node:path";
+import os from "os";
+const desktopPath = os.homedir() + "/Documents/pythias/";
+fs.access(desktopPath, fs.constants.F_OK, (err) => {
+  if (err) {
+    // Directory doesn't exist, create it
+    fs.mkdir(desktopPath, { recursive: true }, (err) => {
+      if (err) {
+        console.error('Error creating directory:', err);
+      } else {
+        console.log('Directory created successfully');
+      }
+    });
+  } else {
+    console.log('Directory already exists');
+  }
+});
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-let users
-let apiKeys
-let useUsers = []
-let useApiKey = {}
-try {
-  fs.readFile(path.join(__dirname, "../users.json"), "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading file:", err);
-    } else {
-      console.log("File content:", data);
-      useUsers = JSON.parse(data);
-    }
-  });
-} catch (e) {
-  console.log("no settings");
+let users =[]
+let apiKeys={}
+try{
+  users = await fs.readFileSync(os.homedir() + "/Documents/pythias/users.json")
+}catch(e){
+  console.log(e)
+  await fs.writeFileSync(os.homedir() + '/Documents/pythias/users.json', JSON.stringify(users), {encoding:'utf8',flag:'w'})
 }
-try {
-  fs.readFile(path.join(__dirname, "../apikeys.json"), "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading file:", err);
-    } else {
-      console.log("File content:", data);
-      useApiKey = JSON.parse(data);
-    }
-  });
-} catch (e) {
-  console.log("no settings");
+try{
+  apiKeys = await fs.readFileSync(os.homedir() + "/Documents/pythias/apiKeys.json")
+}catch(e){
+  console.log(e)
+  await fs.writeFileSync(os.homedir() + '/Documents/pythias/apiKeys.json', JSON.stringify(apiKeys), {encoding:'utf8',flag:'w'})
 }
+let useUsers = JSON.parse(users)
+let useApiKey = JSON.parse(apiKeys)
+
 function generateRandomCharacter() {
    const characters ="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@!#$%^&*";
     return characters.charAt(Math.floor(Math.random() * characters.length));
@@ -48,11 +53,12 @@ export const newUser = async (username, password)=>{
     var salt = bcrypt.genSaltSync(10);
     console.log(username, password)
     useUsers.push({username, password: await bcrypt.hash(password, salt)})
-    await fs.writeFileSync(path.join(__dirname, '../users.json'), JSON.stringify(useUsers), {encoding:'utf8',flag:'w'})
+    await fs.writeFileSync(os.homedir() + '/Documents/pythias/users.json', JSON.stringify(useUsers), {encoding:'utf8',flag:'w'})
     return {error: false, msg: "user created"}
 }
 
 export const login = async (username, password)=>{
+  console.log("+++++ login +++++")
     let user = useUsers.filter(u=> u.username == username)[0]
     if(user){
         if(bcrypt.compareSync(password, user.password)){
@@ -65,7 +71,7 @@ export const login = async (username, password)=>{
 export const generateApiKey = async ()=>{
     var salt = bcrypt.genSaltSync(10);
     let apiKey = await bcrypt.hash(random(10), salt);
-    await fs.writeFileSync(path.join(__dirname, "../apikeys.json"),JSON.stringify({key: apiKey}),{ encoding: "utf8", flag: "w" });
+    await fs.writeFileSync(os.homedir() + '/Documents/pythias/apiKeys.json',JSON.stringify({key: apiKey}),{ encoding: "utf8", flag: "w" });
     useApiKey = {key: apiKey};
     return {error: false, apiKey: {key: apiKey}}
 }

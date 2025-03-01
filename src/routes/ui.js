@@ -27,7 +27,9 @@ router.get("/settings", async (req,res)=>{
     if (!req.query.key || !activeKeys.filter(k=> k.key == req.query.key)[0]) return res.redirect("/login");
     let key = activeKeys.filter((k) => k.key == req.query.key)[0];
     key.lastUsed = Date.now()
-    res.render("settings", {settings: getSettings(), key: req.query.key});
+    let settings = await getSettings()
+    console.log(settings)
+    res.render("settings", {settings: settings, key: req.query.key});
       
 })
 router.get("/account", (req,res)=>{
@@ -39,7 +41,9 @@ router.get("/account", (req,res)=>{
 // auth routes
 
 router.get("/login", async (req,res)=>{
+    console.log(!checkIfUsers())
     let register = !checkIfUsers()
+    console.log(register)
     res.render("login", { key: req.query.key, register });
 })
 router.get("/logout", (req,res)=>{

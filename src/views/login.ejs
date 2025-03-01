@@ -34,7 +34,12 @@
       <div class="col-1"></div>
     </div>
     <script type="text/javascript">
-        let register = Boolean('<%=register%>')
+        console.log('<%=register%>')
+        let reg = '<%=register%>' 
+        let register
+        if(reg == "false")register = false
+        else register = true
+        console.log(register)
         const login = async ()=>{
             console.log(document.getElementById("user-name").value, document.getElementById("password").value)
             if(document.getElementById("user-name").value == ""){
@@ -49,7 +54,7 @@
             }
             if(document.getElementById("user-name").value !== "" && document.getElementById("password").value !== ""){
                 console.log("register", register)
-                let res = await axios.post(!register? "/register": "/login", {userName: document.getElementById("user-name").value, password: document.getElementById("password").value})
+                let res = await axios.post(register == true? "/register": "/login", {userName: document.getElementById("user-name").value, password: document.getElementById("password").value})
                 console.log(res.data)
                 if(res.data.error){
                     alert(res.data.msg)
