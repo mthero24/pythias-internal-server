@@ -38,6 +38,25 @@ router.post("/dtf", checkKeys, async (req,res)=>{
         msg: "Could not reach file writer!",
       });
 })
+router.post("/embroidery", checkKeys, async (req,res)=>{
+  const settings = getSettings();
+  let data = req.body
+  let resData
+  console.log(data)
+  addOutput(`Sent image to DTF Printer PieceID: ${data.sku}`)
+  addOutput(`http://${settings.dtf[data.printer]}/`)
+  let resp = await axios.post(`http://${settings.emb[data.printer]}:3500/`, {...data}).catch(e=>{resData = e.response.data})
+  if (resp) return res.send(resp.data);
+  else if (resData) {
+    addOutput(`Error writing image on DTF Printer PieceID: ${data.sku}`)
+    return res.send(resData);
+  }else
+  addOutput(`Error Could Not Reach DTF Printer PieceID: ${data.sku}`)
+    return res.send({
+      error: true,
+      msg: "Could not reach file writer!",
+    });
+})
 router.post("/roq-folder", checkKeys, async (req, res) => {
   const settings = getSettings();
   let data = req.body;

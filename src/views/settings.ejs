@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
   </head>
-  <body style="background: #faf9f9">
+  <body style="background: #000000">
     <%- include('partials/menu.ejs') %>
     <div class="container-fluid">
         <div class="row" style="margin-top: 2%;">
           <div class="col-sm-6 col-md-4">
-            <h2 style="font-size: 1.2rem; text-align: center;">Shipping Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%">
+            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">Shipping Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
               <div class="card-body">
                 <h6 class="card-title" style="text-align: center;">Printers</h2>
                 <div id="shipping-printers">
@@ -29,12 +29,12 @@
                 <div class="input-group mb-3">
                   <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="shipping-printers-input" aria-describedby="basic-addon2">
                   <div class="input-group-append">
-                    <span class="input-group-text" id="shipping-printers-button" style="cursor: pointer" onclick="save('shipping-printers')">Add Printer</span>
+                    <span class="input-group-text" id="shipping-printers-button" style="cursor: pointer; background: #fedd94;" onclick="save('shipping-printers')">Add Printer</span>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="card" style="width: 100%; margin-bottom: 1%">
+            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
               <div class="card-body">
                 <h6 class="card-title" style="text-align: center;">Scales</h2>
                 <div id="shipping-scales">
@@ -49,15 +49,38 @@
                 <div class="input-group mb-3">
                   <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="shipping-scales-input" aria-describedby="basic-addon2">
                   <div class="input-group-append">
-                    <span class="input-group-text" id="shipping-scales-button" style="cursor: pointer" onclick="save('shipping-scales')">Add Printer</span>
+                    <span class="input-group-text" id="shipping-scales-button" style="cursor: pointer; background: #fedd94;" onclick="save('shipping-scales')">Add Printer</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center;">DTF Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%">
+            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">Embroidery Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%;background: #e2e2e2;">
+              <div class="card-body">
+                <h6 class="card-title" style="text-align: center;">Heads</h2>
+                <div id="emb">
+                  <%_ for(let s of Object.keys(settings.emb? settings.emb: {})){_%>
+                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+                      <p><%=s%>: <%=settings?.emb[s]%></p>
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('dtf', '<%=s%>', '<%=settings.emb[s]%>')"></i> 
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('dtf', '<%=s%>')"></i>
+                    </div>
+                <%_}_%>
+                </div>
+                <div class="input-group mb-3">
+                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="emb-input" aria-describedby="basic-addon2">
+                  <div class="input-group-append">
+                    <span class="input-group-text" id="emb-button" style="cursor: pointer; background: #fedd94;" onclick="save('emb')">Add Printer</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-sm-6 col-md-4 ">
+            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">DTF Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%;background: #e2e2e2;">
               <div class="card-body">
                 <h6 class="card-title" style="text-align: center;">Printers</h2>
                 <div id="dtf">
@@ -72,15 +95,15 @@
                 <div class="input-group mb-3">
                   <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="dtf-input" aria-describedby="basic-addon2">
                   <div class="input-group-append">
-                    <span class="input-group-text" id="dtf-button" style="cursor: pointer" onclick="save('dtf')">Add Printer</span>
+                    <span class="input-group-text" id="dtf-button" style="cursor: pointer; background: #fedd94;" onclick="save('dtf')">Add Printer</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center;">ROQ Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%">
+            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">ROQ Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
               <div class="card-body">
                 <h6 class="card-title" style="text-align: center;">Folders</h2>
                 <div id="roq">
@@ -95,15 +118,15 @@
                 <div class="input-group mb-3">
                   <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="roq-input" aria-describedby="basic-addon2">
                   <div class="input-group-append">
-                    <span class="input-group-text" id="roq-button" style="cursor: pointer" onclick="save('roq')">Add Printer</span>
+                    <span class="input-group-text" id="roq-button" style="cursor: pointer; background: #fedd94;" onclick="save('roq')">Add Printer</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center;">Label Printer Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%">
+            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">Label Printer Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
               <div class="card-body">
                 <h6 class="card-title" style="text-align: center;">Printers</h2>
                 <div id="labelPrinters">
@@ -118,15 +141,15 @@
                 <div class="input-group mb-3">
                   <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="labelPrinters-input" aria-describedby="basic-addon2">
                   <div class="input-group-append">
-                    <span class="input-group-text" id="labelPrinters-button" style="cursor: pointer" onclick="save('labelPrinters')">Add Printer</span>
+                    <span class="input-group-text" id="labelPrinters-button" style="cursor: pointer; background: #fedd94;" onclick="save('labelPrinters')">Add Printer</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center;">Sublimation Printer Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%">
+            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">Sublimation Printer Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
               <div class="card-body">
                 <h6 class="card-title" style="text-align: center;">Printers</h2>
                 <div id="sublimation">
@@ -141,15 +164,15 @@
                 <div class="input-group mb-3">
                   <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="sublimation-input" aria-describedby="basic-addon2">
                   <div class="input-group-append">
-                    <span class="input-group-text" id="sublimation-button" style="cursor: pointer" onclick="save('sublimation')">Add Printer</span>
+                    <span class="input-group-text" id="sublimation-button" style="cursor: pointer; background: #fedd94;" onclick="save('sublimation')">Add Printer</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center;">DTG Printer Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%">
+            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">DTG Printer Settings</h2>
+            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
               <div class="card-body">
                 <h6 class="card-title" style="text-align: center;">Printers</h2>
                 <div id="dtgPrinters">
@@ -164,7 +187,7 @@
                 <div class="input-group mb-3">
                   <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="dtgPrinters-input" aria-describedby="basic-addon2">
                   <div class="input-group-append">
-                    <span class="input-group-text" id="dtgPrinters-button" style="cursor: pointer" onclick="save('dtgPrinters')">Add Printer</span>
+                    <span class="input-group-text" id="dtgPrinters-button" style="cursor: pointer; background: #fedd94;" onclick="save('dtgPrinters')">Add Printer</span>
                   </div>
                 </div>
               </div>

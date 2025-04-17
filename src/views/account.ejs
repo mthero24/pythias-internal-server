@@ -8,20 +8,20 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
   </head>
-  <body style="background: #faf9f9;">
+  <body style="background: #000000;">
     <%- include('partials/menu.ejs') %>
     <div class="row">
       <div class="col-4"></div>
-      <div class="col-4">
-        <img src="/logo-dark-400.png" width="100%" height="auto" style="width: 100%; height: auto;"/>
+      <div class="col-3">
+        <img src="/logoPythias-400.png" width="100%" height="auto" style="width: 100%; height: auto;"/>
         
       </div>
-      <div class="col-4"></div>
+      <div class="col-5"></div>
       <div class="col-1"></div>
       <div class="col-10">
         <div class="input-group mb-3">
           <input type="text" class="form-control" placeholder="Api Key" aria-label="api key" aria-describedby="basic-addon2" disabled value="<%=apiKey.key? apiKey.key: ""%>" id="api-key">
-          <span class="input-group-text" id="basic-addon2" onclick="getKey()" style="cursor: pointer; background-color: #b4d6b4;">Generate New Key</span>
+          <span class="input-group-text" id="basic-addon2" onclick="getKey()" style="cursor: pointer; background-color: #fedd94;">Generate New Key</span>
         </div>
       </div>
       <div class="col-1"></div>

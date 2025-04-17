@@ -21,7 +21,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-let settings = {'shipping':{'scales':{},'printers':{}},'dtf':{},'roq':{},'labelPrinters':{},'sublimation':{},'dtgPrinters':{}}
+let settings = {'shipping':{'scales':{},'printers':{}},'emb': {}, 'dtf':{},'roq':{},'labelPrinters':{},'sublimation':{},'dtgPrinters':{}}
 try{
   settings = await fs.readFileSync(os.homedir() + "/Documents/pythias/settings.json")
 }catch(e){

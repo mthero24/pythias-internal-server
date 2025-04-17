@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
   </head>
-  <body style="background: #faf9f9;">
+  <body style="background: #000000;">
     <%- include('partials/menu.ejs') %>
     <div class="row">
-      <div class="col-4"></div>
-      <div class="col-4">
-        <img src="/logo-dark-400.png" width="100%" height="auto" style="width: 100%; height: auto;"/>
-        
-      </div>
-      <div class="col-4"></div>
+        <div class="col-4"></div>
+        <div class="col-3">
+          <img src="/logoPythias-400.png" width="100%" height="auto" style="width: 100%; height: auto;"/>
+          
+        </div>
+        <div class="col-5"></div>
       <div class="col-1"></div>
       <div class="col-10">
         <div class="form-floating mb-3">
@@ -28,7 +28,7 @@
             <label for="floatingPassword">Password <span style="color: rgb(187, 30, 30); display: none" id="password-required">Required!</span></label>
         </div>
         <div class="d-grid gap-2" style="margin-top: 2%;">
-            <button class="btn" style="background-color: #b4d6b4;" type="button" onclick="login()"><%=register? "Register Account": "Login"%></button>
+            <button class="btn" style="background-color: #fedd94;" type="button" onclick="login()"><%=register? "Register Account": "Login"%></button>
         </div>
       </div>
       <div class="col-1"></div>
