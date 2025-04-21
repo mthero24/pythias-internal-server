@@ -60,12 +60,12 @@ router.post("/embroidery", checkKeys, async (req,res)=>{
 router.post("/roq-folder", checkKeys, async (req, res) => {
   const settings = getSettings();
   let data = req.body;
+  //console.log(data)
   let resData;
-  addOutput(`Sent image to DTF Printer PieceID: ${data.sku}`)
-  console.log(settings["roq"]["roq1"])
-  addOutput(`http://${settings["roq"]["roq1"]}:3500/roq`)
+  addOutput(`Sent files to roq folder PieceID: ${data.barcode}`)
+  addOutput(`http://${settings["roq"]["printer1"]}:3500/roq`)
   let resp = await axios
-    .post(`http://${settings["roq"]["roq1"]}:3500/roq`, { ...data })
+    .post(`http://${settings["roq"]["printer1"]}:3500/roq`, { ...data })
     .catch((e) => {
       console.log("catch", e)
       resData = e.response?.data;
@@ -73,7 +73,7 @@ router.post("/roq-folder", checkKeys, async (req, res) => {
   if (resp) return res.send(resp?.data);
   else if (resData) {
     console.log(resData)
-    addOutput(`Error writing image on ROQ  PieceID: ${data.sku}`)
+    addOutput(`Error writing image on ROQ  PieceID: ${data.barcode}`)
     return res.send(resData);
   }
   else
