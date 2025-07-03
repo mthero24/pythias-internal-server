@@ -14,8 +14,10 @@ const checkKeys = (req,res,next)=>{
   //next()
   let keys = getKeys();
   if(key == keys.key){
+    addOutput(`good key: ${key}`)
     next()
   }else{
+    addOutput(`bad key: ${key}`)
     res.send({error:true, msg: "invalid key"})
   }
 }
@@ -43,15 +45,15 @@ router.post("/embroidery", checkKeys, async (req,res)=>{
   let data = req.body
   let resData
   console.log(data)
-  addOutput(`Sent image to DTF Printer PieceID: ${data.sku}`)
-  addOutput(`http://${settings.dtf[data.printer]}/`)
-  let resp = await axios.post(`http://${settings.emb[data.printer]}:3500/`, {...data}).catch(e=>{resData = e.response.data})
+  addOutput(`Sent image to embroidery Printer PieceID: ${data.sku}`)
+  addOutput(`http://${settings.emb[data.printer]}/`)
+  let resp = await axios.post(`http://${settings.emb[data.printer]}:3500/embroidery`, {...data}).catch(e=>{resData = e.response.data})
   if (resp) return res.send(resp.data);
   else if (resData) {
-    addOutput(`Error writing image on DTF Printer PieceID: ${data.sku}`)
+    addOutput(`Error writing image on embroidery Printer PieceID: ${data.sku}`)
     return res.send(resData);
   }else
-  addOutput(`Error Could Not Reach DTF Printer PieceID: ${data.sku}`)
+  addOutput(`Error Could Not Reach embroidery Printer PieceID: ${data.sku}`)
     return res.send({
       error: true,
       msg: "Could not reach file writer!",
@@ -60,9 +62,10 @@ router.post("/embroidery", checkKeys, async (req,res)=>{
 router.post("/roq-folder", checkKeys, async (req, res) => {
   const settings = getSettings();
   let data = req.body;
-  //console.log(data)
   let resData;
-  addOutput(`Sent files to roq folder PieceID: ${data.barcode}`)
+  addOutput(`Sent image to roq folder PieceID: ${data.sku}`)
+  console.log(settings["roq"])
+  console.log(settings["printer1"])
   addOutput(`http://${settings["roq"]["printer1"]}:3500/roq`)
   let resp = await axios
     .post(`http://${settings["roq"]["printer1"]}:3500/roq`, { ...data })
@@ -73,7 +76,7 @@ router.post("/roq-folder", checkKeys, async (req, res) => {
   if (resp) return res.send(resp?.data);
   else if (resData) {
     console.log(resData)
-    addOutput(`Error writing image on ROQ  PieceID: ${data.barcode}`)
+    addOutput(`Error writing image on ROQ  PieceID: ${data.sku}`)
     return res.send(resData);
   }
   else
@@ -103,9 +106,26 @@ router.post("/shipping/printers", checkKeys, async (req, res) => {
     return res.send({error: true, msg: `error printing label : ${data.station} ${data.type} ${JSON.stringify(e)} ${e}`})
   }
 });
+router.post("/shipping/cpu", checkKeys, async (req, res) => {
+  const settings = getSettings();
+  let data = req.body;
+  console.log(data.type, "type route");
+  try{
+    addOutput(`print label : ${data.station} ${data.type}`)
+    console.log(`http://${settings.shipping.printers[data.station]}:3500/print-shipping`)
+    let resp = await axios.post(`http://${settings.shipping.printers[data.station]}:3500/print-shipping`, data) 
+    console.log(resp.data, "route");
+    return res.send(resp.data);
+  }catch(e){
+    addOutput(`error printing label : ${data.station} ${data.type} ${JSON.stringify(e)} ${e}`)
+    return res.send({error: true, msg: `error printing label : ${data.station} ${data.type} ${JSON.stringify(e)} ${e}`})
+  }
+});
 router.get("/shipping/scales", checkKeys, async (req, res) => {
   const settings = getSettings();
+  console.log(settings.shipping.scales["station1"])
   try {
+    console.log(req.query.station)
     let resp = await getWeight({
       url: `http://${settings.shipping.scales[req.query.station]}:3003/getweight`,
     });
@@ -136,6 +156,21 @@ router.post("/print-labels", checkKeys, async (req,res)=>{
   }catch(e){
     addOutput(`Error Printing Labels - ${e}`)
     return res.send({ error: true, msg: e });
+  }
+});
+router.post("/print-labels-pdf", checkKeys, async (req,res)=>{
+  const settings = getSettings();
+  let data = req.body;
+  console.log(data.type, "type route");
+  try{
+    addOutput(`print label : ${data.printer} ${data.type}`)
+    console.log(`http://${settings.labelPrinters[data.printer]}:3500/print-labels`)
+    let resp = await axios.post(`http://${settings.labelPrinters[data.printer]}:3500/print-labels`, data) 
+    console.log(resp.data, "route");
+    return res.send(resp.data);
+  }catch(e){
+    addOutput(`error printing label : ${data.printer} ${data.type} ${JSON.stringify(e)} ${e}`)
+    return res.send({error: true, msg: `error printing label : ${data.station} ${data.type} ${JSON.stringify(e)} ${e}`})
   }
 });
 router.post("/sublimation", checkKeys, async (req, res) => {

@@ -64,8 +64,8 @@
                   <%_ for(let s of Object.keys(settings.emb? settings.emb: {})){_%>
                     <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
                       <p><%=s%>: <%=settings?.emb[s]%></p>
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('dtf', '<%=s%>', '<%=settings.emb[s]%>')"></i> 
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('dtf', '<%=s%>')"></i>
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('emb', '<%=s%>', '<%=settings.emb[s]%>')"></i> 
+                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('emb', '<%=s%>')"></i>
                     </div>
                 <%_}_%>
                 </div>
@@ -222,6 +222,7 @@
         if(editParam){
           param = editParam
         }else{
+          if(!settings[type.split("-")]) settings[type.split("-")] = {}
           let sp = type.split("-")
           let l = sp.length
           console.log(l)
