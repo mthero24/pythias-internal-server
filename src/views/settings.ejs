@@ -2,301 +2,281 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>internal server</title>
-    <link rel="stylesheet" href="index.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <title>Pythias — Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@emotion/react@11.11.4/dist/emotion-react.umd.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@emotion/styled@11.11.0/dist/emotion-styled.umd.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@mui/material@5.15.12/umd/material-ui.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <style>* { box-sizing: border-box; } body { margin: 0; background: #0d0d0d; }</style>
   </head>
-  <body style="background: #000000">
+  <body>
+    <script>
+      window._settings = <%- JSON.stringify(settings) %>;
+      window._settingsKey = <%- JSON.stringify(key || '') %>;
+    </script>
     <%- include('partials/menu.ejs') %>
-    <div class="container-fluid">
-        <div class="row" style="margin-top: 2%;">
-          <div class="col-sm-6 col-md-4">
-            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">Shipping Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
-              <div class="card-body">
-                <h6 class="card-title" style="text-align: center;">Printers</h2>
-                <div id="shipping-printers">
-                  <%_ for(let s of Object.keys(settings.shipping?.printers? settings.shipping.printers: {})){_%>
-                      <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                        <p><%=s%>: <%=settings.shipping?.printers[s]%></p>
-                        <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('shipping-printers', '<%=s%>', '<%=settings.shipping?.printers[s]%>')"></i> 
-                        <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('shipping-printers', '<%=s%>')"></i>
-                      </div>
-                  <%_}_%>
-                </div>
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="shipping-printers-input" aria-describedby="basic-addon2">
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="shipping-printers-button" style="cursor: pointer; background: #fedd94;" onclick="save('shipping-printers')">Add Printer</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
-              <div class="card-body">
-                <h6 class="card-title" style="text-align: center;">Scales</h2>
-                <div id="shipping-scales">
-                  <%_ for(let s of Object.keys(settings.shipping?.scales? settings.shipping?.scales: {} )){_%>
-                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                      <p><%=s%>: <%=settings.shipping?.scales[s]%></p>
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('shipping-scales', '<%=s%>', '<%=settings.shipping?.scales[s]%>')"></i> 
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('shipping-scales', '<%=s%>')"></i>
-                    </div>
-                <%_}_%>
-                </div>
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="shipping-scales-input" aria-describedby="basic-addon2">
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="shipping-scales-button" style="cursor: pointer; background: #fedd94;" onclick="save('shipping-scales')">Add Printer</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">Embroidery Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%;background: #e2e2e2;">
-              <div class="card-body">
-                <h6 class="card-title" style="text-align: center;">Heads</h2>
-                <div id="emb">
-                  <%_ for(let s of Object.keys(settings.emb? settings.emb: {})){_%>
-                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                      <p><%=s%>: <%=settings?.emb[s]%></p>
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('emb', '<%=s%>', '<%=settings.emb[s]%>')"></i> 
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('emb', '<%=s%>')"></i>
-                    </div>
-                <%_}_%>
-                </div>
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="emb-input" aria-describedby="basic-addon2">
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="emb-button" style="cursor: pointer; background: #fedd94;" onclick="save('emb')">Add Printer</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">DTF Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%;background: #e2e2e2;">
-              <div class="card-body">
-                <h6 class="card-title" style="text-align: center;">Printers</h2>
-                <div id="dtf">
-                  <%_ for(let s of Object.keys(settings.dtf? settings.dtf: {})){_%>
-                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                      <p><%=s%>: <%=settings?.dtf[s]%></p>
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('dtf', '<%=s%>', '<%=settings.dtf[s]%>')"></i> 
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('dtf', '<%=s%>')"></i>
-                    </div>
-                <%_}_%>
-                </div>
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="dtf-input" aria-describedby="basic-addon2">
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="dtf-button" style="cursor: pointer; background: #fedd94;" onclick="save('dtf')">Add Printer</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">ROQ Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
-              <div class="card-body">
-                <h6 class="card-title" style="text-align: center;">Folders</h2>
-                <div id="roq">
-                  <%_ for(let s of Object.keys(settings.roq? settings.roq: {})){_%>
-                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                      <p><%=s%>: <%=settings?.roq[s]%></p>
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('roq', '<%=s%>', '<%=settings.roq[s]%>')"></i> 
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('roq', '<%=s%>')"></i>
-                    </div>
-                <%_}_%>
-                </div>
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="roq-input" aria-describedby="basic-addon2">
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="roq-button" style="cursor: pointer; background: #fedd94;" onclick="save('roq')">Add Printer</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">Label Printer Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
-              <div class="card-body">
-                <h6 class="card-title" style="text-align: center;">Printers</h2>
-                <div id="labelPrinters">
-                  <%_ for(let s of Object.keys(settings.labelPrinters? settings.labelPrinters: {})){_%>
-                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                      <p><%=s%>: <%=settings.labelPrinters[s]%></p>
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('labelPrinters', '<%=s%>', '<%=settings.labelPrinters[s]%>')"></i> 
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('labelPrinters', '<%=s%>')"></i>
-                    </div>
-                <%_}_%>
-                </div>
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="labelPrinters-input" aria-describedby="basic-addon2">
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="labelPrinters-button" style="cursor: pointer; background: #fedd94;" onclick="save('labelPrinters')">Add Printer</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">Sublimation Printer Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
-              <div class="card-body">
-                <h6 class="card-title" style="text-align: center;">Printers</h2>
-                <div id="sublimation">
-                  <%_ for(let s of Object.keys(settings?.sublimation? settings.sublimation: {})){_%>
-                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                      <p><%=s%>: <%=settings.sublimation[s]%></p>
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('sublimation', '<%=s%>', '<%=settings.sublimation[s]%>')"></i> 
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('sublimation', '<%=s%>')"></i>
-                    </div>
-                <%_}_%>
-                </div>
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="sublimation-input" aria-describedby="basic-addon2">
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="sublimation-button" style="cursor: pointer; background: #fedd94;" onclick="save('sublimation')">Add Printer</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="col-sm-6 col-md-4 ">
-            <h2 style="font-size: 1.2rem; text-align: center; color: #ffffff;">DTG Printer Settings</h2>
-            <div class="card" style="width: 100%; margin-bottom: 1%; background: #e2e2e2;">
-              <div class="card-body">
-                <h6 class="card-title" style="text-align: center;">Printers</h2>
-                <div id="dtgPrinters">
-                  <%_ for(let s of Object.keys(settings?.dtgPrinters? settings.dtgPrinters: {})){_%>
-                    <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                      <p><%=s%>: <%=settings.dtgPrinters[s]%></p>
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('dtgPrinters', '<%=s%>', '<%=settings.dtgPrinters[s]%>')"></i> 
-                      <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left" onclick="del('dtgPrinters', '<%=s%>')"></i>
-                    </div>
-                <%_}_%>
-                </div>
-                <div class="input-group mb-3">
-                  <input type="text" class="form-control" placeholder="IP address" aria-label="ip address" id="dtgPrinters-input" aria-describedby="basic-addon2">
-                  <div class="input-group-append">
-                    <span class="input-group-text" id="dtgPrinters-button" style="cursor: pointer; background: #fedd94;" onclick="save('dtgPrinters')">Add Printer</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-    </div>
-    <script type="text/javascript">
-      console.log(`<%-JSON.stringify(settings)%>`)
-      let settings = JSON.parse(`<%-JSON.stringify(settings)%>`)
-      console.log(typeof settings, settings)
-      let key = '<%=key%>'
-      let editParam
-      let edit = (type, param, ip)=>{
-        editParam = param
-        document.getElementById(`${type}-input`).value = ip
-        console.log(`${type}-button`)
-        document.getElementById(`${type}-button`).innerText = `Edit ${param}`
-      }
-      const updateServer = async (settings)=>{
-        console.log("updateServer")
-        let res = await axios.post("/update-settings", {settings, key})
-        //console.log(res.data)
-        if(res.data.error) {
-          alert(res.data.msg)
-          if(res.data.msg == "invalid key") location.href = "/login"
-        }
-        else console.log("updated")
-      }
-      let save = (type) =>{
-        let param
-        if(editParam){
-          param = editParam
-        }else{
-          if(!settings[type.split("-")]) settings[type.split("-")] = {}
-          let sp = type.split("-")
-          let l = sp.length
-          console.log(l)
-          console.log(sp[0], settings.shipping, typeof settings)
-          let next = 1
-          if((l == 1 && settings[sp[0]]) || (settings[sp[0]] && settings[sp[0]][sp[1]])) next = Object.keys(l == 1? settings[sp[0]]: settings[sp[0]][sp[1]]).length + 1
-          console.log(settings[sp[0]], sp[0])
-          param = Object.keys(l == 1? settings[sp[0]]: settings[sp[0]] && settings[sp[0]][sp[1]]).length == 0? sp.length == 2? "station1": "printer1": l == 1? Object.keys(settings[sp[0]])[0].replace("1", next): Object.keys(settings[sp[0]][sp[1]])[0].replace("1", next)
-        }
-        let sp = type.split("-")
-        let l = sp.length
-        if(l == 1){
-          settings[sp[0]][param] = document.getElementById(`${type}-input`).value
-        }else if(l == 2){
-          settings[sp[0]][sp[1]][param] = document.getElementById(`${type}-input`).value
-        }
-        //update settings
-        updatePage(sp, l, type)
-        updateServer(settings)
-        document.getElementById(`${type}-input`).value = ""
-        document.getElementById(`${type}-button`).innerText = "Add Printer"
+    <div id="root"></div>
+    <script type="text/babel">
+      const {
+        ThemeProvider, createTheme, CssBaseline, Box, Grid, Card, CardContent,
+        CardHeader, Typography, TextField, Button, IconButton, Tooltip,
+        Snackbar, Alert, Divider, Chip, CircularProgress,
+      } = MaterialUI;
+      const { useState, useCallback } = React;
 
-        //update screen
-        editParam = null
+      const theme = createTheme({
+        palette: {
+          mode: 'dark',
+          primary: { main: '#fedd94', contrastText: '#1a1a1a' },
+          background: { default: '#0d0d0d', paper: '#1a1a1a' },
+        },
+        typography: { fontFamily: '"Roboto", sans-serif' },
+        shape: { borderRadius: 10 },
+      });
+
+      // Auto-generate the next key name for a section
+      function nextKey(prefix, existingKeys) {
+        const nums = existingKeys
+          .filter(k => k.startsWith(prefix))
+          .map(k => parseInt(k.slice(prefix.length)))
+          .filter(n => !isNaN(n) && n > 0);
+        return `${prefix}${nums.length === 0 ? 1 : Math.max(...nums) + 1}`;
       }
-      const updatePage = (sp, l, type)=>{
-        let html = ""
-        if(l == 1){
-          for(let s of Object.keys(settings[sp[0]])){
-            if(settings[sp[0]][s] != undefined){
-              html += `
-                <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                  <p>${s}: ${settings[sp[0]][s]}</p>
-                  <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('${sp[0]}', '${s}', '${settings[sp[0]][s]}')"></i> 
-                  <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left"></i>
-                </div>
-              `
-            }
-          }
-        }else if(l == 2){
-          for(let s of Object.keys(settings[sp[0]][sp[1]])){
-            if(settings[sp[0]][sp[1]][s] != undefined){
-              html += `
-                <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
-                  <p>${s}: ${settings[sp[0]][sp[1]][s]}</p>
-                  <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-pen-to-square" onclick="edit('${sp[0]}-${sp[1]}', '${s}', '${settings[sp[0]][sp[1]][s]}')"></i> 
-                  <i style="margin-top: 1%; cursor: pointer;" class="fa-solid fa-delete-left"></i>
-                </div>
-              `
-            }
-          }
+
+      // Get/set a nested value in the settings object by path array
+      function getAtPath(obj, path) {
+        return path.reduce((o, k) => (o && o[k] != null ? o[k] : {}), obj);
+      }
+      function setAtPath(obj, path, value) {
+        const next = { ...obj };
+        if (path.length === 1) {
+          next[path[0]] = value;
+        } else {
+          next[path[0]] = setAtPath(obj[path[0]] || {}, path.slice(1), value);
         }
-        document.getElementById(type).innerHTML = html
+        return next;
       }
-      const del = (type, param)=>{
-        console.log("del")
-        let sp = type.split("-")
-        let l = sp.length
-        if(l == 1){
-          let newO = {}
-          for(let s of Object.keys(settings[sp[0]])){
-            if(s !== param) newO[s] = settings[sp[0]][s]
-          }
-          settings[sp[0]] = newO
-        }else if(l == 2){
-          let newO = {}
-          for(let s of Object.keys( settings[sp[0]][sp[1]])){
-            if(s !== param) newO[s] =  settings[sp[0]][sp[1]][s]
-          }
-          settings[sp[0]][sp[1]] = newO
-        }
-        updatePage(sp, l, type)
-        updateServer(settings)
+
+      const SECTIONS = [
+        { title: 'Shipping Printers', icon: 'fa-truck', path: ['shipping', 'printers'], prefix: 'printer', placeholder: 'IP address (e.g. 192.168.1.10)' },
+        { title: 'Shipping Scales',   icon: 'fa-weight-hanging', path: ['shipping', 'scales'],   prefix: 'station', placeholder: 'IP address' },
+        { title: 'Embroidery',        icon: 'fa-scissors',     path: ['emb'],           prefix: 'head',    placeholder: 'IP address' },
+        { title: 'DTF Printers',      icon: 'fa-print',        path: ['dtf'],           prefix: 'printer', placeholder: 'IP address' },
+        { title: 'ROQ',               icon: 'fa-boxes-stacked',path: ['roq'],           prefix: 'printer', placeholder: 'IP address' },
+        { title: 'Label Printers',    icon: 'fa-tag',          path: ['labelPrinters'], prefix: 'printer', placeholder: 'IP address' },
+        { title: 'Sublimation',       icon: 'fa-droplet',      path: ['sublimation'],   prefix: 'printer', placeholder: 'IP address' },
+        { title: 'DTG Printers',      icon: 'fa-tshirt',       path: ['dtgPrinters'],   prefix: 'printer', placeholder: 'IP address' },
+      ];
+
+      function SettingSection({ section, entries, onAdd, onEdit, onDelete }) {
+        const [newIp, setNewIp] = useState('');
+        const [editKey, setEditKey] = useState(null);
+        const [editVal, setEditVal] = useState('');
+
+        const startEdit = (k, v) => { setEditKey(k); setEditVal(v); };
+        const cancelEdit = () => { setEditKey(null); setEditVal(''); };
+
+        const commitEdit = () => {
+          if (!editVal.trim()) return;
+          onEdit(editKey, editVal.trim());
+          cancelEdit();
+        };
+
+        const handleAdd = () => {
+          if (!newIp.trim()) return;
+          onAdd(newIp.trim());
+          setNewIp('');
+        };
+
+        const entryList = Object.entries(entries);
+
+        return (
+          <Card sx={{ bgcolor: '#1a1a1a', border: '1px solid #2a2a2a', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardHeader
+              avatar={<i className={`fa-solid ${section.icon}`} style={{ color: '#fedd94', fontSize: '1rem', width: 20, textAlign: 'center' }} />}
+              title={<Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#f0f0f0' }}>{section.title}</Typography>}
+              sx={{ pb: 0, borderBottom: '1px solid #2a2a2a' }}
+            />
+            <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', gap: 1, pt: 1.5 }}>
+              {/* Entry list */}
+              <Box sx={{ flexGrow: 1, minHeight: 40 }}>
+                {entryList.length === 0 ? (
+                  <Typography variant="caption" sx={{ color: '#444', display: 'block', textAlign: 'center', py: 1 }}>
+                    No entries yet
+                  </Typography>
+                ) : entryList.map(([k, v]) => (
+                  <Box key={k} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.75 }}>
+                    {editKey === k ? (
+                      <>
+                        <Chip label={k} size="small" sx={{ bgcolor: '#2a2a2a', color: '#fedd94', border: '1px solid #fedd9440', minWidth: 70 }} />
+                        <TextField
+                          size="small"
+                          value={editVal}
+                          onChange={(e) => setEditVal(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') cancelEdit(); }}
+                          autoFocus
+                          sx={{ flexGrow: 1, '& .MuiOutlinedInput-root': { '&.Mui-focused fieldset': { borderColor: '#fedd94' } } }}
+                        />
+                        <Tooltip title="Save">
+                          <IconButton size="small" onClick={commitEdit} sx={{ color: '#4caf50' }}>
+                            <i className="fa-solid fa-check" style={{ fontSize: '0.85rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Cancel">
+                          <IconButton size="small" onClick={cancelEdit} sx={{ color: '#666' }}>
+                            <i className="fa-solid fa-xmark" style={{ fontSize: '0.85rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    ) : (
+                      <>
+                        <Chip label={k} size="small" sx={{ bgcolor: '#2a2a2a', color: '#fedd94', border: '1px solid #fedd9440', minWidth: 70 }} />
+                        <Typography variant="body2" sx={{ color: '#ccc', flexGrow: 1, fontFamily: 'monospace' }}>{v}</Typography>
+                        <Tooltip title="Edit">
+                          <IconButton size="small" onClick={() => startEdit(k, v)} sx={{ color: '#666', '&:hover': { color: '#fedd94' } }}>
+                            <i className="fa-solid fa-pen" style={{ fontSize: '0.8rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton size="small" onClick={() => onDelete(k)} sx={{ color: '#666', '&:hover': { color: '#ef5350' } }}>
+                            <i className="fa-solid fa-trash" style={{ fontSize: '0.8rem' }} />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+
+              <Divider sx={{ borderColor: '#2a2a2a' }} />
+
+              {/* Add new */}
+              <Box sx={{ display: 'flex', gap: 1, pt: 0.5 }}>
+                <TextField
+                  size="small"
+                  placeholder={section.placeholder}
+                  value={newIp}
+                  onChange={(e) => setNewIp(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                  fullWidth
+                  sx={{ '& .MuiOutlinedInput-root': { '&.Mui-focused fieldset': { borderColor: '#fedd94' } } }}
+                />
+                <Button
+                  variant="contained"
+                  onClick={handleAdd}
+                  sx={{ bgcolor: '#fedd94', color: '#1a1a1a', fontWeight: 700, whiteSpace: 'nowrap', '&:hover': { bgcolor: '#f5ca60' }, minWidth: 60 }}
+                >
+                  Add
+                </Button>
+              </Box>
+            </CardContent>
+          </Card>
+        );
       }
+
+      function SettingsPage() {
+        const [settings, setSettings] = useState(window._settings);
+        const [saving, setSaving] = useState(false);
+        const [toast, setToast] = useState({ open: false, msg: '', severity: 'success' });
+
+        const showToast = (msg, severity = 'success') => setToast({ open: true, msg, severity });
+
+        const saveToServer = useCallback(async (newSettings) => {
+          setSaving(true);
+          try {
+            const { data } = await axios.post('/update-settings', { settings: newSettings, key: window._settingsKey });
+            if (data.error) {
+              showToast(data.msg || 'Save failed', 'error');
+              if (data.msg === 'invalid key') location.href = '/login';
+            } else {
+              showToast('Settings saved');
+            }
+          } catch {
+            showToast('Could not reach server', 'error');
+          } finally {
+            setSaving(false);
+          }
+        }, []);
+
+        const handleAdd = (section, ip) => {
+          const current = getAtPath(settings, section.path);
+          const key = nextKey(section.prefix, Object.keys(current));
+          const updated = setAtPath(settings, section.path, { ...current, [key]: ip });
+          setSettings(updated);
+          saveToServer(updated);
+        };
+
+        const handleEdit = (section, entryKey, newIp) => {
+          const current = getAtPath(settings, section.path);
+          const updated = setAtPath(settings, section.path, { ...current, [entryKey]: newIp });
+          setSettings(updated);
+          saveToServer(updated);
+        };
+
+        const handleDelete = (section, entryKey) => {
+          const current = { ...getAtPath(settings, section.path) };
+          delete current[entryKey];
+          const updated = setAtPath(settings, section.path, current);
+          setSettings(updated);
+          saveToServer(updated);
+        };
+
+        return (
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', p: { xs: 2, md: 3 } }}>
+              {/* Page header */}
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+                <Typography variant="h5" sx={{ color: '#f0f0f0', fontWeight: 700 }}>
+                  Settings
+                </Typography>
+                {saving && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CircularProgress size={16} sx={{ color: '#fedd94' }} />
+                    <Typography variant="caption" sx={{ color: '#fedd94' }}>Saving…</Typography>
+                  </Box>
+                )}
+              </Box>
+
+              <Grid container spacing={2.5}>
+                {SECTIONS.map((section) => (
+                  <Grid item xs={12} sm={6} lg={4} key={section.title}>
+                    <SettingSection
+                      section={section}
+                      entries={getAtPath(settings, section.path)}
+                      onAdd={(ip) => handleAdd(section, ip)}
+                      onEdit={(k, v) => handleEdit(section, k, v)}
+                      onDelete={(k) => handleDelete(section, k)}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Box>
+
+            <Snackbar
+              open={toast.open}
+              autoHideDuration={3000}
+              onClose={() => setToast(t => ({ ...t, open: false }))}
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+              <Alert
+                severity={toast.severity}
+                sx={{ bgcolor: toast.severity === 'success' ? 'rgba(76,175,80,0.15)' : 'rgba(211,47,47,0.15)', border: `1px solid ${toast.severity === 'success' ? '#4caf50' : '#f44336'}` }}
+              >
+                {toast.msg}
+              </Alert>
+            </Snackbar>
+          </ThemeProvider>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<SettingsPage />);
     </script>
   </body>
 </html>

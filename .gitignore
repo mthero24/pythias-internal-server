@@ -90,6 +90,9 @@ typings/
 
 # Electron-Forge
 out/
+../.forge-tmp/
 src/logs.json
 src/users.json
 src/apikeys.json
+src/settings.json
+.env

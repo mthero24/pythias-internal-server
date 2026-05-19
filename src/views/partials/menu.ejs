@@ -1,22 +1,62 @@
-<nav class="" style="background: #fedd94;">
-    <div class="row">
-    <div class="col-sm-3" style="padding:1%;">
-        <<div><a class="" href="/"><img src="/pythias-logo-new-black-100.png" alt="logo" width="75" height="auto" style="margin-left: 20%; padding: 0px;"/></a></div>
-    </div>
-    <div class="col-sm-6 ">
-    </div>
-    <div class="col-sm-3 ">
-        <div style="margin-top: 5%; padding: 2%">
-            <p style="color: #332c2c; font-size: 2rem; text-align: right; margin-right: 20%">
-                <a href="/settings?key=<%=key%>"><i class="fa-solid fa-gear" style="color: #332c2c; font-size: 2rem; text-align: right;"></i></a>
-                <%_if(key){_%>
-                    <a href="/account?key=<%=key%>"><i class="fa-solid fa-user" style="color: #332c2c; font-size: 2rem; text-align: right;"></i></a>
-                    <a href="/logout?key=<%=key%>"><i class="fa-solid fa-right-from-bracket" style="color: #332c2c; font-size: 2rem; text-align: right;"></i></a>
-                <%_}else{_%>
-                    <a href="/login?key=<%=key%>"><i class="fa-solid fa-user" style="color: #332c2c; font-size: 2rem; text-align: right;"></i></a>
-                <%_}_%>
-            </p>
-        </div>
-    </div>
-    </div>
-</nav>
+<script>
+  window._navKey = <%- JSON.stringify(key || '') %>;
+</script>
+<div id="nav-root"></div>
+<script type="text/babel">
+  const { AppBar, Toolbar, Box, IconButton, Tooltip, ThemeProvider, createTheme } = MaterialUI;
+
+  const navTheme = createTheme({
+    palette: {
+      mode: 'dark',
+      primary: { main: '#fedd94', contrastText: '#1a1a1a' },
+    },
+    typography: { fontFamily: '"Roboto", sans-serif' },
+  });
+
+  function NavBar() {
+    const key = window._navKey;
+    return (
+      <ThemeProvider theme={navTheme}>
+        <AppBar position="fixed" elevation={0} sx={{ bgcolor: '#fedd94', borderBottom: '2px solid #e8c020' }}>
+          <Toolbar sx={{ minHeight: 60 }}>
+            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
+              <a href={key ? `/?key=${key}` : '/'} style={{ display: 'flex', alignItems: 'center' }}>
+                <img src="/pythias-logo-new-black-100.png" alt="Pythias" height="34" style={{ display: 'block' }} />
+              </a>
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Tooltip title="Settings">
+                <IconButton href={`/settings?key=${key}`} size="large" sx={{ color: '#1a1a1a' }}>
+                  <i className="fa-solid fa-gear" style={{ fontSize: '1.1rem' }} />
+                </IconButton>
+              </Tooltip>
+              {key ? (
+                <>
+                  <Tooltip title="Account">
+                    <IconButton href={`/account?key=${key}`} size="large" sx={{ color: '#1a1a1a' }}>
+                      <i className="fa-solid fa-user" style={{ fontSize: '1.1rem' }} />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Logout">
+                    <IconButton href={`/logout?key=${key}`} size="large" sx={{ color: '#1a1a1a' }}>
+                      <i className="fa-solid fa-right-from-bracket" style={{ fontSize: '1.1rem' }} />
+                    </IconButton>
+                  </Tooltip>
+                </>
+              ) : (
+                <Tooltip title="Login">
+                  <IconButton href="/login" size="large" sx={{ color: '#1a1a1a' }}>
+                    <i className="fa-solid fa-user" style={{ fontSize: '1.1rem' }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+            </Box>
+          </Toolbar>
+        </AppBar>
+        <Toolbar sx={{ minHeight: 60 }} />
+      </ThemeProvider>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('nav-root')).render(<NavBar />);
+</script>

@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, Tray, Menu, autoUpdater } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { fileURLToPath } from "url";
@@ -17,8 +17,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import apiRoutes from "./routes/api.js"
 import uiRoutes from "./routes/ui.js"
-import update from "./functions/update.cjs"
-update();
+import setupUpdates from "./functions/update.cjs"
 const desktopPath = os.homedir() + "/Documents/hotfolder/";
 const publicDirectoryPath = path.join(__dirname, "public");
 let lastFileWritten = "Waiting for file to write";
@@ -43,75 +42,77 @@ exp.listen(3005, async function () {
   console.log("writer listening on port 3005");
 });
 
-//electron functions
+let mainWindow = null;
+let tray = null;
+
+const createTray = () => {
+  const iconPath = path.join(__dirname, '/public/pythias-logo-new-gold-black-bg.ico');
+  tray = new Tray(iconPath);
+  tray.setToolTip('Pythias Internal Server');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: 'Show', click: () => { mainWindow.show(); mainWindow.focus(); } },
+    { type: 'separator' },
+    { label: 'Quit', click: () => { app.isQuiting = true; app.quit(); } },
+  ]));
+  tray.on('click', () => { mainWindow.show(); mainWindow.focus(); });
+};
+
 const createWindow = async () => {
-  // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1000,
     height: 1500,
     fullscreen: true,
-    //autoHideMenuBar: true,
     kiosk: true,
-    //skipTaskbar: true,
-     icon: path.join(__dirname, "/public/logoPythias-400.png"),
+    icon: path.join(__dirname, '/public/logoPythias-400.png'),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: true,
+      webSecurity: true,
     },
   });
-  mainWindow.maximize();
 
-  // and load the index.html of the app.
-  mainWindow.loadURL("http://localhost:3005");
-  
-  mainWindow.on("minimize", function (event) {
+  mainWindow.loadURL('http://localhost:3005');
+
+  mainWindow.on('minimize', (event) => {
     event.preventDefault();
     mainWindow.hide();
   });
-  
-  mainWindow.on("close", function (event) {
-    if (!application.isQuiting) {
+
+  mainWindow.on('close', (event) => {
+    if (!app.isQuiting) {
       event.preventDefault();
       mainWindow.hide();
     }
-
-    return false;
   });
-  // Open the DevTools.
- //mainWindow.webContents.openDevTools();
-  // const printers = await mainWindow.webContents.getPrintersAsync();
-  // console.log(printers);
-  // print(path.join(__dirname, "/assets/DecisionLetter20250129082714.pdf"), {printer:"HP OfficeJet Pro 8020 series [63D443]"});
 };
 
-ipcMain.on("print-document", (event, options) => {
-  // Use a printing library (like `pdf-to-printer`) to print the received HTML
-  // ... handle printing logic here
-  print(path.join(__dirname, `/assets/${options.file}`), {
-    printer: options.printer,
-  });
+ipcMain.on('print-document', (event, options) => {
+  print(path.join(__dirname, `/assets/${options.file}`), { printer: options.printer });
 });
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+
+ipcMain.on('minimize-to-tray', () => mainWindow.hide());
+
+ipcMain.on('install-update', () => autoUpdater.quitAndInstall());
+
 app.whenReady().then(async () => {
+  app.setLoginItemSettings({ openAtLogin: true, name: 'Pythias Internal Server' });
   createWindow();
+  createTray();
+  setupUpdates(mainWindow);
 
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    }
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+  if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('before-quit', () => {
+  app.isQuiting = true;
 });
 
 // In this file you can include the rest of your app's specific main process

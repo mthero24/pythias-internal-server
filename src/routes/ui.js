@@ -47,7 +47,7 @@ router.get("/login", async (req,res)=>{
     res.render("login", { key: req.query.key, register });
 })
 router.get("/logout", (req,res)=>{
-    activeKeys.filter((k) => k.key !== req.query.key);
+    activeKeys = activeKeys.filter((k) => k.key !== req.query.key);
     res.redirect("/")
 })
 
@@ -70,7 +70,7 @@ router.post("/login", async (req, res) => {
 router.post("/register", async (req, res) => {
   // verify user
   let resp = newUser(req.body.userName, req.body.password);
-  if (!resp.error) activeKeys.push({ key: res.key, lastUsed: Date.now() });
+  if (!resp.error) activeKeys.push({ key: resp.key, lastUsed: Date.now() });
   //login
   res.send(resp);
 });

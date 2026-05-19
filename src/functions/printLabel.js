@@ -10,17 +10,17 @@ export const print = async ({label, printer, type}) => {
             headers:{
                 "Content-Type": "application/json",
                 "x-rapidapi-host": "html-to-zpl.p.rapidapi.com'",
-                "x-rapidapi-key": "edd1235e37msh7802b7ad18848f0p1b290ejsn40b5d5d1d893"
+                "x-rapidapi-key": process.env.RAPIDAPI_KEY
 
             }
         }
         let res = await axios.post("https://html-to-zpl.p.rapidapi.com/pdf2zpl",{pdfBase64: btoa(atob(label)), width:4, height: 6, dpi: 203, speed: 2, scale: "fitToWidth"}, headers).catch(e=>{console.log(e.response.data)})
         console.log(res.data)
         data = res.data
-        data = new Buffer.from(btoa(data), "base64")
+        data = Buffer.from(btoa(data), "base64")
     }else{
         console.log(label, "before convert")
-        data= new Buffer.from(label, "base64")
+        data = Buffer.from(label, "base64")
     }
     console.log(printer)
     var printer = ipp.Printer(printer);

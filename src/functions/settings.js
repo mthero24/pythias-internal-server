@@ -1,57 +1,53 @@
-
-import fs from "fs"
+import fs from "fs";
 import path from 'node:path';
 import os from "os";
-const desktopPath = os.homedir() + "/Documents/pythias/";
-fs.access(desktopPath, fs.constants.F_OK, (err) => {
-  if (err) {
-    // Directory doesn't exist, create it
-    fs.mkdir(desktopPath, { recursive: true }, (err) => {
-      if (err) {
-        console.error('Error creating directory:', err);
-      } else {
-        console.log('Directory created successfully');
+import { app } from "electron";
+
+const settingsDir = os.homedir() + "/Documents/pythias/";
+const settingsPath = settingsDir + "settings.json";
+
+const defaultSettings = { shipping: { scales: {}, printers: {} }, emb: {}, dtf: {}, roq: {}, labelPrinters: {}, sublimation: {}, dtgPrinters: {} };
+
+fs.mkdirSync(settingsDir, { recursive: true });
+
+// On first install, migrate data from legacy locations used by older versions
+if (!fs.existsSync(settingsPath)) {
+  const legacyPaths = [
+    path.join(app.getPath('userData'), 'settings.json'),
+    path.join(path.dirname(app.getPath('exe')), 'settings.json'),
+  ];
+  for (const legacy of legacyPaths) {
+    try {
+      const data = fs.readFileSync(legacy, 'utf8');
+      if (data && data.trim()) {
+        fs.writeFileSync(settingsPath, data, { encoding: 'utf8', flag: 'w' });
+        fs.renameSync(legacy, legacy + '.migrated');
+        break;
       }
-    });
-  } else {
-    console.log('Directory already exists');
+    } catch { /* not found at this path, try next */ }
   }
-});
-import { fileURLToPath } from "url";
-import { dirname } from "path";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-let settings = {'shipping':{'scales':{},'printers':{}},'emb': {}, 'dtf':{},'roq':{},'labelPrinters':{},'sublimation':{},'dtgPrinters':{}}
-try{
-  settings = await fs.readFileSync(os.homedir() + "/Documents/pythias/settings.json")
-}catch(e){
-    console.log(e)
-    await fs.writeFileSync(os.homedir() + '/Documents/pythias/settings.json', JSON.stringify(settings), {encoding:'utf8',flag:'w'})
-}
-let useSettings = JSON.parse(settings)
-try {
-  fs.readFile(path.join(os.homedir() + "/Documents/pythias/settings.json"), "utf8", (err, data) => {
-    if (err) {
-      console.error("Error reading file:", err);
-    } else {
-      console.log("File content:", data);
-      useSettings = JSON.parse(data);
-    }
-  });
-} catch (e) {
-  console.log("no settings");
-}
-console.log(useSettings, "useSettings")
-export const updateSettings = async (set)=>{
-    try{
-        useSettings = {...set}
-        await fs.writeFileSync(os.homedir() + "/Documents/pythias/settings.json", JSON.stringify(set), {encoding:'utf8',flag:'w'})
-        return {error: false, msg: "json updated", useSettings}
-    }catch(e){
-        return {error: true, msg: e}
-    }
 }
 
-export function getSettings(){
-    return useSettings
+let rawSettings;
+try {
+  rawSettings = fs.readFileSync(settingsPath, "utf8");
+} catch {
+  fs.writeFileSync(settingsPath, JSON.stringify(defaultSettings), { encoding: "utf8", flag: "w" });
+  rawSettings = JSON.stringify(defaultSettings);
+}
+
+let useSettings = JSON.parse(rawSettings);
+
+export const updateSettings = async (set) => {
+  try {
+    useSettings = { ...set };
+    fs.writeFileSync(settingsPath, JSON.stringify(set), { encoding: "utf8", flag: "w" });
+    return { error: false, msg: "json updated", useSettings };
+  } catch (e) {
+    return { error: true, msg: e };
+  }
+};
+
+export function getSettings() {
+  return useSettings;
 }

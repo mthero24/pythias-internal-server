@@ -1,45 +1,45 @@
-import fs from "fs"
-import path from 'node:path';
-import { fileURLToPath } from "url";
-import { dirname } from "path";
+import fs from "fs";
+import path from "node:path";
 import os from "os";
-const desktopPath = os.homedir() + "/Documents/pythias/";
-fs.access(desktopPath, fs.constants.F_OK, (err) => {
-  if (err) {
-    // Directory doesn't exist, create it
-    fs.mkdir(desktopPath, { recursive: true }, (err) => {
-      if (err) {
-        console.error('Error creating directory:', err);
-      } else {
-        console.log('Directory created successfully');
+import { app } from "electron";
+
+const logsDir = os.homedir() + "/Documents/pythias/";
+const logsPath = logsDir + "logs.json";
+
+fs.mkdirSync(logsDir, { recursive: true });
+
+// On first install, migrate logs from legacy locations used by older versions
+if (!fs.existsSync(logsPath)) {
+  const legacyPaths = [
+    path.join(app.getPath('userData'), 'logs.json'),
+    path.join(app.getPath('userData'), 'output.json'),
+    path.join(path.dirname(app.getPath('exe')), 'logs.json'),
+    path.join(path.dirname(app.getPath('exe')), 'output.json'),
+  ];
+  for (const legacy of legacyPaths) {
+    try {
+      const data = fs.readFileSync(legacy, 'utf8');
+      if (data && data.trim()) {
+        fs.writeFileSync(logsPath, data, { encoding: 'utf8', flag: 'w' });
+        fs.renameSync(legacy, legacy + '.migrated');
+        break;
       }
-    });
-  } else {
-    console.log('Directory already exists');
+    } catch { /* not found at this path, try next */ }
   }
-});
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-let output = [];
-try{
-    output = await fs.readFileSync(os.homedir() + "/Documents/pythias/logs.json")
-}catch(e){
-    console.log(e)
-    await fs.writeFileSync(os.homedir() + '/Documents/pythias/logs.json', JSON.stringify(output), {encoding:'utf8',flag:'w'})
-}
-let useOutput = JSON.parse(output)
-let addOutput = async (out)=>{
-    useOutput.push({
-        output: out,
-        time: new Date(Date.now())
-    })
-    if(useOutput.length > 500) useOutput.shift()
-     await fs.writeFileSync(os.homedir() + '/Documents/pythias/logs.json', JSON.stringify(useOutput), {encoding:'utf8',flag:'w'})
-    
 }
 
-let getOutput = ()=>{
-    return useOutput
+let useOutput = [];
+try {
+  const raw = fs.readFileSync(logsPath, "utf8");
+  useOutput = raw ? JSON.parse(raw) : [];
+} catch {
+  fs.writeFileSync(logsPath, "[]", { encoding: "utf8", flag: "w" });
 }
 
-export {getOutput, addOutput}
+export const addOutput = (out) => {
+  useOutput.push({ output: out, time: new Date() });
+  if (useOutput.length > 500) useOutput.shift();
+  fs.writeFileSync(logsPath, JSON.stringify(useOutput), { encoding: "utf8", flag: "w" });
+};
+
+export const getOutput = () => useOutput;
