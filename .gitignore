@@ -96,3 +96,10 @@ src/users.json
 src/apikeys.json
 src/settings.json
 .env
+
+# Build output
+.forge-tmp/
+out/
+
+# Per-machine runtime config (written to ~/Documents/pythias/)
+src/settings.json

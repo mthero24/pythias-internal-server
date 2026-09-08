@@ -59,7 +59,7 @@ module.exports = {
       config: {
         repository: {
           owner: "mthero24",
-          name: "pythias-electon-apps",
+          name: "pythias-internal-server",
         },
         icon: "./src/public/logo-dark-50-ico",
         prerelease: false,
