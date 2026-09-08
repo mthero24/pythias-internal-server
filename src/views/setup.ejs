@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pythias — Setup Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@emotion/react@11.11.4/dist/emotion-react.umd.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@emotion/styled@11.11.0/dist/emotion-styled.umd.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@mui/material@5.15.12/umd/material-ui.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone@7.23.10/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <style>* { box-sizing: border-box; } body { margin: 0; background: #0d0d0d; }</style>
+  </head>
+  <body>
+    <script>
+      window._setupKey  = <%- JSON.stringify(key  || '') %>;
+      window._localIP   = <%- JSON.stringify(localIP || '') %>;
+    </script>
+    <%- include('partials/menu.ejs') %>
+    <div id="root"></div>
+    <script type="text/babel">
+      const {
+        ThemeProvider, createTheme, CssBaseline,
+        Box, Grid, Card, CardContent, Typography, Chip,
+        Button, IconButton, Tooltip, Divider, Accordion,
+        AccordionSummary, AccordionDetails, Alert, CircularProgress,
+        Snackbar,
+      } = MaterialUI;
+      const { useState, useEffect, useCallback } = React;
+
+      const theme = createTheme({
+        palette: {
+          mode: 'dark',
+          primary: { main: '#fedd94', contrastText: '#1a1a1a' },
+          background: { default: '#0d0d0d', paper: '#1a1a1a' },
+        },
+        typography: { fontFamily: '"Roboto", sans-serif' },
+        shape: { borderRadius: 10 },
+      });
+
+      const KEY    = window._setupKey;
+      const LOCAL_IP = window._localIP;
+      const AUTH   = { headers: { Authorization: 'Bearer ' + KEY } };
+
+      // ── helpers ──────────────────────────────────────────────────────────────
+
+      function SectionHeader({ icon, title, subtitle }) {
+        return (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
+            <Box sx={{ width: 36, height: 36, borderRadius: '8px', bgcolor: 'rgba(254,221,148,0.1)', border: '1px solid rgba(254,221,148,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <i className={`fa-solid ${icon}`} style={{ color: '#fedd94', fontSize: '0.95rem' }} />
+            </Box>
+            <Box>
+              <Typography variant="h6" sx={{ color: '#fedd94', fontWeight: 700, lineHeight: 1.2 }}>{title}</Typography>
+              {subtitle && <Typography variant="caption" sx={{ color: '#777' }}>{subtitle}</Typography>}
+            </Box>
+          </Box>
+        );
+      }
+
+      function Step({ n, children }) {
+        return (
+          <Box sx={{ display: 'flex', gap: 1.5, mb: 1.5 }}>
+            <Box sx={{ width: 22, height: 22, borderRadius: '50%', bgcolor: 'rgba(254,221,148,0.15)', border: '1px solid rgba(254,221,148,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, mt: '1px' }}>
+              <Typography variant="caption" sx={{ color: '#fedd94', fontWeight: 700, fontSize: '0.65rem' }}>{n}</Typography>
+            </Box>
+            <Typography variant="body2" sx={{ color: '#ccc', lineHeight: 1.7 }}>{children}</Typography>
+          </Box>
+        );
+      }
+
+      function Code({ children }) {
+        return (
+          <Box component="code" sx={{ display: 'inline-block', bgcolor: '#0d0d0d', border: '1px solid #333', borderRadius: '4px', px: 0.75, py: 0.1, fontFamily: 'monospace', fontSize: '0.8rem', color: '#fedd94', whiteSpace: 'pre' }}>
+            {children}
+          </Box>
+        );
+      }
+
+      function CodeBlock({ children }) {
+        return (
+          <Box sx={{ bgcolor: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: '6px', p: 1.5, my: 1, fontFamily: 'monospace', fontSize: '0.78rem', color: '#9cdcfe', whiteSpace: 'pre-wrap', lineHeight: 1.7 }}>
+            {children}
+          </Box>
+        );
+      }
+
+      function Note({ children, type = 'info' }) {
+        const colors = { info: '#64b5f6', warn: '#ffb74d', success: '#81c784' };
+        const bgs    = { info: 'rgba(100,181,246,0.06)', warn: 'rgba(255,183,77,0.06)', success: 'rgba(129,199,132,0.06)' };
+        const icons  = { info: 'fa-circle-info', warn: 'fa-triangle-exclamation', success: 'fa-circle-check' };
+        return (
+          <Box sx={{ display: 'flex', gap: 1.5, bgcolor: bgs[type], border: `1px solid ${colors[type]}30`, borderRadius: '6px', p: 1.5, my: 1.5 }}>
+            <i className={`fa-solid ${icons[type]}`} style={{ color: colors[type], fontSize: '0.85rem', marginTop: 2, flexShrink: 0 }} />
+            <Typography variant="body2" sx={{ color: colors[type], lineHeight: 1.7 }}>{children}</Typography>
+          </Box>
+        );
+      }
+
+      // ── Tajima Queue Panel ───────────────────────────────────────────────────
+
+      function QueuePanel() {
+        const [allQueues, setAllQueues]   = useState({});   // { machineName: [items] }
+        const [machines, setMachines]     = useState([]);
+        const [activeMachine, setActive]  = useState(null);
+        const [loading, setLoading]       = useState(true);
+        const [toast, setToast]           = useState(null);
+
+        const fetchQueue = useCallback(async () => {
+          try {
+            const { data } = await axios.get('/api/tajima/queue', AUTH);
+            // group flat list by machine
+            const grouped = {};
+            (data.queue || []).forEach(d => {
+              if (!grouped[d.machine]) grouped[d.machine] = [];
+              grouped[d.machine].push(d);
+            });
+            const names = data.machines || Object.keys(grouped);
+            // ensure every known machine has an entry (even if empty)
+            names.forEach(m => { if (!grouped[m]) grouped[m] = []; });
+            setAllQueues(grouped);
+            setMachines(names);
+            setActive(prev => prev && names.includes(prev) ? prev : (names[0] || 'default'));
+          } catch { /* ignore */ }
+          finally { setLoading(false); }
+        }, []);
+
+        useEffect(() => { fetchQueue(); const t = setInterval(fetchQueue, 3000); return () => clearInterval(t); }, [fetchQueue]);
+
+        const remove = async (id, machine) => {
+          await axios.delete(`/api/tajima/queue/${id}?machine=${machine}`, AUTH);
+          setToast('Design removed');
+          fetchQueue();
+        };
+
+        const clearMachine = async (machine) => {
+          await axios.delete(`/api/tajima/queue?machine=${machine}`, AUTH);
+          setToast(`Queue "${machine}" cleared`);
+          fetchQueue();
+        };
+
+        const clearAll = async () => {
+          await axios.delete('/api/tajima/queue', AUTH);
+          setToast('All queues cleared');
+          fetchQueue();
+        };
+
+        const queue = activeMachine ? (allQueues[activeMachine] || []) : [];
+        const totalCount = Object.values(allQueues).reduce((s, q) => s + q.length, 0);
+
+        return (
+          <Card sx={{ bgcolor: '#141414', border: '1px solid #2a2a2a', height: '100%' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                <SectionHeader icon="fa-layer-group" title="Tajima Design Queues" subtitle="DST files waiting for machine retrieval" />
+                {totalCount > 0 && (
+                  <Tooltip title="Clear all queues">
+                    <Button size="small" variant="outlined" color="error" onClick={clearAll}
+                      sx={{ fontSize: '0.7rem', py: 0.25, minWidth: 0, borderColor: '#c62828', color: '#ef5350', '&:hover': { bgcolor: 'rgba(239,83,80,0.08)' } }}>
+                      <i className="fa-solid fa-trash" style={{ marginRight: 6 }} /> Clear All
+                    </Button>
+                  </Tooltip>
+                )}
+              </Box>
+
+              {/* Machine tabs */}
+              {machines.length > 0 && (
+                <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+                  {machines.map(m => {
+                    const count = (allQueues[m] || []).length;
+                    const isActive = m === activeMachine;
+                    return (
+                      <Box
+                        key={m}
+                        onClick={() => setActive(m)}
+                        sx={{
+                          cursor: 'pointer', px: 1.5, py: 0.5, borderRadius: '6px',
+                          bgcolor: isActive ? 'rgba(254,221,148,0.12)' : 'rgba(255,255,255,0.04)',
+                          border: `1px solid ${isActive ? 'rgba(254,221,148,0.4)' : '#2a2a2a'}`,
+                          display: 'flex', alignItems: 'center', gap: 1,
+                          '&:hover': { borderColor: 'rgba(254,221,148,0.25)' },
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ color: isActive ? '#fedd94' : '#888', fontWeight: isActive ? 700 : 400 }}>
+                          {m}
+                        </Typography>
+                        {count > 0 && (
+                          <Box sx={{ width: 18, height: 18, borderRadius: '50%', bgcolor: '#fedd94', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Typography variant="caption" sx={{ color: '#1a1a1a', fontWeight: 700, fontSize: '0.6rem' }}>{count}</Typography>
+                          </Box>
+                        )}
+                      </Box>
+                    );
+                  })}
+                </Box>
+              )}
+
+              {/* Per-machine clear button */}
+              {queue.length > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
+                  <Button size="small" onClick={() => clearMachine(activeMachine)}
+                    sx={{ fontSize: '0.68rem', color: '#ef5350', textTransform: 'none', minWidth: 0 }}>
+                    <i className="fa-solid fa-trash" style={{ marginRight: 4, fontSize: '0.7rem' }} /> Clear {activeMachine}
+                  </Button>
+                </Box>
+              )}
+
+              {loading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress size={24} sx={{ color: '#fedd94' }} />
+                </Box>
+              ) : queue.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <i className="fa-solid fa-inbox" style={{ color: '#444', fontSize: '1.8rem', display: 'block', marginBottom: 8 }} />
+                  <Typography variant="body2" sx={{ color: '#555' }}>Queue is empty</Typography>
+                </Box>
+              ) : (
+                queue.map((d, i) => (
+                  <Box key={d.id} sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1, borderBottom: i < queue.length - 1 ? '1px solid #222' : 'none' }}>
+                    <Box sx={{ width: 28, height: 28, borderRadius: '6px', bgcolor: 'rgba(254,221,148,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Typography variant="caption" sx={{ color: '#888', fontWeight: 700 }}>{i + 1}</Typography>
+                    </Box>
+                    <Box sx={{ flexGrow: 1, minWidth: 0 }}>
+                      <Typography variant="body2" sx={{ color: '#ddd', fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name}</Typography>
+                      <Typography variant="caption" sx={{ color: '#666' }}>{(d.size / 1024).toFixed(1)} KB</Typography>
+                    </Box>
+                    <Chip label="pending" size="small" sx={{ bgcolor: 'rgba(255,183,77,0.1)', color: '#ffb74d', border: '1px solid rgba(255,183,77,0.2)', fontSize: '0.65rem', height: 20 }} />
+                    <Tooltip title="Remove">
+                      <IconButton size="small" onClick={() => remove(d.id, d.machine)} sx={{ color: '#555', '&:hover': { color: '#ef5350' } }}>
+                        <i className="fa-solid fa-xmark" style={{ fontSize: '0.75rem' }} />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                ))
+              )}
+            </CardContent>
+
+            <Snackbar open={!!toast} autoHideDuration={2500} onClose={() => setToast(null)} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+              <Alert severity="success" onClose={() => setToast(null)} sx={{ bgcolor: '#1e3a1e' }}>{toast}</Alert>
+            </Snackbar>
+          </Card>
+        );
+      }
+
+      // ── Setup Guide ──────────────────────────────────────────────────────────
+
+      function SetupGuide() {
+        const [expanded, setExpanded] = useState('tajima-ftp');
+        const toggle = panel => (_, isOpen) => setExpanded(isOpen ? panel : false);
+        const pcIP = LOCAL_IP || '<PC-IP-ADDRESS>';
+
+        const accSx = { bgcolor: '#141414', border: '1px solid #2a2a2a', mb: 1, borderRadius: '10px !important', '&:before': { display: 'none' } };
+        const sumSx = { color: '#ccc', '& .MuiAccordionSummary-expandIconWrapper': { color: '#666' } };
+
+        return (
+          <Box>
+            <SectionHeader icon="fa-book-open" title="Setup Guide" subtitle="Configure devices to connect to this server" />
+
+            {/* ── Network / PC IP ── */}
+            <Accordion expanded={expanded === 'network'} onChange={toggle('network')} sx={accSx} disableGutters>
+              <AccordionSummary expandIcon={<i className="fa-solid fa-chevron-down" />} sx={sumSx}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <i className="fa-solid fa-network-wired" style={{ color: '#fedd94', fontSize: '0.85rem', width: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>Network — Static IP Setup</Typography>
+                  <Chip label="Do first" size="small" sx={{ bgcolor: 'rgba(239,83,80,0.1)', color: '#ef5350', border: '1px solid rgba(239,83,80,0.2)', fontSize: '0.65rem', height: 20 }} />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Note type="warn">
+                  The PC running this server must have a <strong>static IP</strong> on the LAN. If DHCP assigns a new IP after a restart, all machine configs break.
+                </Note>
+                <Step n="1">Open <strong>Windows Settings → Network &amp; Internet → Ethernet → IP assignment</strong></Step>
+                <Step n="2">Switch from <strong>Automatic (DHCP)</strong> to <strong>Manual</strong></Step>
+                <Step n="3">Enter an IP outside your router's DHCP range (e.g. <Code>192.168.1.200</Code>), your subnet mask (<Code>255.255.255.0</Code>), and gateway (<Code>192.168.1.1</Code>)</Step>
+                <Step n="4">Set DNS to <Code>8.8.8.8</Code> (Google) or your router's IP</Step>
+                <Typography variant="body2" sx={{ color: '#777', mt: 1 }}>To find the current IP, open PowerShell and run:</Typography>
+                <CodeBlock>(Get-NetIPAddress -AddressFamily IPv4 | Where-Object {'{'}$_.IPAddress -notlike "127.*"{'}'}).IPAddress</CodeBlock>
+                <Note type="info">This server's configured IP: <strong style={{ color: '#fedd94' }}>{pcIP}</strong> — set via the <Code>localIP</Code> environment variable or <Code>INTERNAL_HOST</Code> in your .env file.</Note>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* ── Tajima FTP ── */}
+            <Accordion expanded={expanded === 'tajima-ftp'} onChange={toggle('tajima-ftp')} sx={accSx} disableGutters>
+              <AccordionSummary expandIcon={<i className="fa-solid fa-chevron-down" />} sx={sumSx}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <i className="fa-solid fa-sewing-needle" style={{ color: '#fedd94', fontSize: '0.85rem', width: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>Tajima Machine — FTP Transfer</Typography>
+                  <Chip label="Recommended" size="small" sx={{ bgcolor: 'rgba(129,199,132,0.1)', color: '#81c784', border: '1px solid rgba(129,199,132,0.2)', fontSize: '0.65rem', height: 20 }} />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Note type="success">FTP is a standard protocol — works on most Tajima TFMX, TMEZ, TMAR, and TMCE series machines without special software.</Note>
+                <Typography variant="body2" sx={{ color: '#aaa', mb: 1.5 }}>On the machine's control panel, navigate to <strong>Network Settings</strong> (usually under <em>System → Communication</em> or <em>Option → Network</em>) and set:</Typography>
+                <Box sx={{ bgcolor: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: '6px', p: 2, mb: 2 }}>
+                  {[
+                    ['Transfer Mode',    'FTP  (or "LAN FTP")'],
+                    ['FTP Server IP',    pcIP],
+                    ['FTP Port',         '2121'],
+                    ['Username',         'anonymous  (or anything)'],
+                    ['Password',         '(leave blank, or anything)'],
+                    ['Remote Directory', '/  or  /designs'],
+                    ['Passive Mode',     'ON  (PASV)'],
+                  ].map(([k, v]) => (
+                    <Box key={k} sx={{ display: 'flex', gap: 2, mb: 0.75 }}>
+                      <Typography variant="caption" sx={{ color: '#666', fontFamily: 'monospace', width: 160, flexShrink: 0 }}>{k}</Typography>
+                      <Typography variant="caption" sx={{ color: '#fedd94', fontFamily: 'monospace' }}>{v}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+                <Step n="1">Save the settings and restart the machine's network interface</Step>
+                <Step n="2">Scan an embroidery item in any Pythias production app — a DST file will appear in the queue above</Step>
+                <Step n="3">On the machine, press <strong>Retrieve Design</strong> (or equivalent — varies by model). The machine will connect, list available files, and download the next DST</Step>
+                <Step n="4">The design is removed from the queue automatically after transfer</Step>
+                <Note type="info">Check the <strong>Activity Log</strong> on the home screen for real-time FTP connection logs. You should see lines like <em>[tajima] FTP client connected</em> and <em>[tajima] FTP: sending "PIECE123.dst"</em>.</Note>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* ── Tajima TCP Spooler ── */}
+            <Accordion expanded={expanded === 'tajima-tcp'} onChange={toggle('tajima-tcp')} sx={accSx} disableGutters>
+              <AccordionSummary expandIcon={<i className="fa-solid fa-chevron-down" />} sx={sumSx}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <i className="fa-solid fa-plug" style={{ color: '#fedd94', fontSize: '0.85rem', width: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>Tajima Machine — TCP Design Spooler</Typography>
+                  <Chip label="Experimental" size="small" sx={{ bgcolor: 'rgba(255,183,77,0.1)', color: '#ffb74d', border: '1px solid rgba(255,183,77,0.2)', fontSize: '0.65rem', height: 20 }} />
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Note type="warn">Tajima's spooler protocol (port 9050) is not publicly documented. This server implements a best-effort handler based on common industrial embroidery spooler patterns. If designs don't transfer, use FTP instead and share the Activity Log output to help reverse-engineer the handshake.</Note>
+                <Typography variant="body2" sx={{ color: '#aaa', mb: 1.5 }}>On the machine, configure:</Typography>
+                <Box sx={{ bgcolor: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: '6px', p: 2, mb: 2 }}>
+                  {[
+                    ['Mode',         'LAN Spooler  (or "Network Spooler")'],
+                    ['Spooler IP',   pcIP],
+                    ['Spooler Port', '9050'],
+                  ].map(([k, v]) => (
+                    <Box key={k} sx={{ display: 'flex', gap: 2, mb: 0.75 }}>
+                      <Typography variant="caption" sx={{ color: '#666', fontFamily: 'monospace', width: 160, flexShrink: 0 }}>{k}</Typography>
+                      <Typography variant="caption" sx={{ color: '#fedd94', fontFamily: 'monospace' }}>{v}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+                <Step n="1">Save and restart the machine's network</Step>
+                <Step n="2">When the machine connects, check the Activity Log — every byte the machine sends is logged in hex and ASCII</Step>
+                <Step n="3">If designs don't transfer, copy those log lines and share them so the server's protocol handler can be updated with the exact bytes your machine uses</Step>
+                <Typography variant="body2" sx={{ color: '#777', mt: 1.5, fontStyle: 'italic' }}>The server responds to: LIST / LS / DIR (design list), GET / SEND / LOAD / READ / FETCH &lt;name&gt; (fetch by name), and single-byte index commands (0x01–0x7F). It sends a READY greeting on connect.</Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* ── Multiple Tajima Machines ── */}
+            <Accordion expanded={expanded === 'tajima-multi'} onChange={toggle('tajima-multi')} sx={accSx} disableGutters>
+              <AccordionSummary expandIcon={<i className="fa-solid fa-chevron-down" />} sx={sumSx}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <i className="fa-solid fa-sitemap" style={{ color: '#fedd94', fontSize: '0.85rem', width: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>Multiple Tajima Machines</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Note type="info">Each machine gets its own named queue. Designs are routed to the correct machine based on which queue the operator selects in the embroidery scan page.</Note>
+
+                <Typography variant="subtitle2" sx={{ color: '#fedd94', mb: 1, mt: 0.5 }}>Step 1 — Name your machines in Settings</Typography>
+                <Typography variant="body2" sx={{ color: '#aaa', mb: 1 }}>Go to <strong>Settings → Tajima → Machines</strong> and add one entry per machine (e.g. <Code>machine1</Code>, <Code>machine2</Code>).</Typography>
+
+                <Typography variant="subtitle2" sx={{ color: '#fedd94', mb: 1, mt: 1.5 }}>Step 2 — Map each machine's IP to its queue name</Typography>
+                <Typography variant="body2" sx={{ color: '#aaa', mb: 1 }}>This tells the server which queue to serve when a machine connects via FTP or TCP. Go to <strong>Settings → Tajima → IP Map</strong> and add entries:</Typography>
+                <CodeBlock>{`192.168.1.42  →  machine1
+192.168.1.43  →  machine2`}</CodeBlock>
+                <Typography variant="body2" sx={{ color: '#777', mb: 1.5 }}>Or call the API directly:</Typography>
+                <CodeBlock>{`POST /api/tajima/ip-map
+{ "map": { "192.168.1.42": "machine1", "192.168.1.43": "machine2" } }`}</CodeBlock>
+
+                <Typography variant="subtitle2" sx={{ color: '#fedd94', mb: 1, mt: 1.5 }}>Step 3 — Configure each Pythias app's embroidery page</Typography>
+                <Typography variant="body2" sx={{ color: '#aaa', mb: 1 }}>In each app's <Code>app/production/embroidery/page.js</Code>, pass the machine list:</Typography>
+                <CodeBlock>{`<Main printers={["printer1"]} tajimaQueues={["machine1", "machine2"]} />`}</CodeBlock>
+                <Typography variant="body2" sx={{ color: '#aaa', mt: 1 }}>The operator will see a <strong>Tajima Machine Queue</strong> toggle bar above the scan input, letting them choose which machine the next scan goes to.</Typography>
+
+                <Typography variant="subtitle2" sx={{ color: '#fedd94', mb: 1, mt: 1.5 }}>Step 4 — Configure each machine for FTP</Typography>
+                <Typography variant="body2" sx={{ color: '#aaa' }}>All machines use the same FTP server on this PC (port <Code>2121</Code>). The IP map ensures each machine only sees its own queue when it connects.</Typography>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* ── GTX Printer ── */}
+            <Accordion expanded={expanded === 'gtx'} onChange={toggle('gtx')} sx={accSx} disableGutters>
+              <AccordionSummary expandIcon={<i className="fa-solid fa-chevron-down" />} sx={sumSx}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <i className="fa-solid fa-print" style={{ color: '#fedd94', fontSize: '0.85rem', width: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>Brother GTX Printer</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Note type="info">The GTX file-writer server runs on port 3004 on the PC connected to the GTX printer (can be this PC or a separate one).</Note>
+                <Step n="1">On the GTX PC, ensure <Code>GTX4CMD.exe</Code> and <Code>GTX4Api.dll</Code> are present (copied by Pythias setup)</Step>
+                <Step n="2">The GTX file-writer service should start automatically. It listens on <Code>:3004</Code></Step>
+                <Step n="3">In Pythias Settings, set the GTX host to the IP of the GTX PC (defaults to <Code>localhost</Code>)</Step>
+                <Step n="4">On the GTX machine control panel, set the PC as the print source</Step>
+                <Note type="info">The GTX production page in each Pythias app polls this server every 5 seconds to show on-printer status and the print queue.</Note>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* ── DTF / Embroidery file writers ── */}
+            <Accordion expanded={expanded === 'filewriters'} onChange={toggle('filewriters')} sx={accSx} disableGutters>
+              <AccordionSummary expandIcon={<i className="fa-solid fa-chevron-down" />} sx={sumSx}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <i className="fa-solid fa-server" style={{ color: '#fedd94', fontSize: '0.85rem', width: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>DTF / Embroidery File Writers</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Typography variant="body2" sx={{ color: '#aaa', mb: 1.5 }}>Each printer station runs a small file-writer service on port <Code>3500</Code>. The internal server proxies to them using the IPs set in Settings.</Typography>
+                <Box sx={{ bgcolor: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: '6px', p: 2, mb: 2 }}>
+                  {[
+                    ['DTF printer1/2/3',   'Settings → DTF → printer1 / printer2 / printer3'],
+                    ['Embroidery printer', 'Settings → Embroidery → printer1'],
+                    ['ROQ DTG',            'Settings → ROQ → printer1'],
+                    ['Sublimation',        'Settings → Sublimation → printer1'],
+                  ].map(([k, v]) => (
+                    <Box key={k} sx={{ display: 'flex', gap: 2, mb: 0.75 }}>
+                      <Typography variant="caption" sx={{ color: '#666', fontFamily: 'monospace', width: 180, flexShrink: 0 }}>{k}</Typography>
+                      <Typography variant="caption" sx={{ color: '#ccc', fontFamily: 'monospace' }}>{v}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+                <Step n="1">Go to <strong>Settings</strong> (gear icon, top right) and enter the IP address of each file-writer PC</Step>
+                <Step n="2">Test by scanning a piece — the Activity Log will show the request and any errors</Step>
+                <Note type="warn">If you see <em>"Could not reach file writer"</em> in the Activity Log, verify the file-writer service is running on that PC and the IP in Settings is correct.</Note>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* ── Shipping scales / printers ── */}
+            <Accordion expanded={expanded === 'shipping'} onChange={toggle('shipping')} sx={accSx} disableGutters>
+              <AccordionSummary expandIcon={<i className="fa-solid fa-chevron-down" />} sx={sumSx}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <i className="fa-solid fa-scale-balanced" style={{ color: '#fedd94', fontSize: '0.85rem', width: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>Shipping Scales &amp; Label Printers</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Typography variant="body2" sx={{ color: '#aaa', mb: 1.5 }}>Shipping stations use USB scales (weight over HTTP on port 3003) and label printers (IPP on port 631 or file-writer on port 3500).</Typography>
+                <Step n="1">Go to <strong>Settings → Shipping → Scales</strong> and enter the IP of each scale server (station1, station2, etc.)</Step>
+                <Step n="2">Go to <strong>Settings → Shipping → Printers</strong> and enter the IP of each label printer PC</Step>
+                <Step n="3">For Zebra / direct-print label printers, use <strong>Settings → Label Printers</strong></Step>
+                <Note type="info">Scale IPs point to a small Node service running on the scale PC that reads the USB scale and returns the weight as JSON. Label printer IPs can point to either an IPP-capable printer or a PC running the file-writer service.</Note>
+              </AccordionDetails>
+            </Accordion>
+
+            {/* ── Firewall ── */}
+            <Accordion expanded={expanded === 'firewall'} onChange={toggle('firewall')} sx={accSx} disableGutters>
+              <AccordionSummary expandIcon={<i className="fa-solid fa-chevron-down" />} sx={sumSx}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <i className="fa-solid fa-shield-halved" style={{ color: '#fedd94', fontSize: '0.85rem', width: 18 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 600 }}>Windows Firewall — Required Ports</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails sx={{ pt: 0 }}>
+                <Typography variant="body2" sx={{ color: '#aaa', mb: 1.5 }}>Make sure these inbound ports are open on the PC running this server:</Typography>
+                <Box sx={{ bgcolor: '#0a0a0a', border: '1px solid #2a2a2a', borderRadius: '6px', p: 2, mb: 1 }}>
+                  {[
+                    ['3005', 'TCP', 'Pythias Internal Server (main API)'],
+                    ['2121', 'TCP', 'Tajima FTP design transfer'],
+                    ['9050', 'TCP', 'Tajima TCP Design Spooler'],
+                    ['3004', 'TCP', 'GTX file-writer (if on this PC)'],
+                  ].map(([port, proto, desc]) => (
+                    <Box key={port} sx={{ display: 'flex', gap: 2, mb: 0.75, alignItems: 'center' }}>
+                      <Chip label={port} size="small" sx={{ bgcolor: 'rgba(254,221,148,0.08)', color: '#fedd94', border: '1px solid rgba(254,221,148,0.2)', fontFamily: 'monospace', fontSize: '0.7rem', height: 20, minWidth: 44 }} />
+                      <Typography variant="caption" sx={{ color: '#666', width: 36, flexShrink: 0 }}>{proto}</Typography>
+                      <Typography variant="caption" sx={{ color: '#aaa' }}>{desc}</Typography>
+                    </Box>
+                  ))}
+                </Box>
+                <Typography variant="body2" sx={{ color: '#777', mb: 0.5 }}>To open a port in PowerShell (run as Administrator):</Typography>
+                <CodeBlock>{`New-NetFirewallRule -DisplayName "Tajima FTP" -Direction Inbound -Protocol TCP -LocalPort 2121 -Action Allow
+New-NetFirewallRule -DisplayName "Tajima Spooler" -Direction Inbound -Protocol TCP -LocalPort 9050 -Action Allow`}</CodeBlock>
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        );
+      }
+
+      // ── Page ─────────────────────────────────────────────────────────────────
+
+      function SetupPage() {
+        return (
+          <ThemeProvider theme={theme}>
+            <CssBaseline />
+            <Box sx={{ minHeight: 'calc(100vh - 60px)', bgcolor: 'background.default', p: { xs: 2, md: 3 }, overflowY: 'auto' }}>
+              <Box sx={{ maxWidth: 1100, mx: 'auto' }}>
+                <Box sx={{ mb: 3 }}>
+                  <Typography variant="h5" sx={{ color: '#fedd94', fontWeight: 700 }}>Setup Guide</Typography>
+                  <Typography variant="caption" sx={{ color: '#666' }}>Configure embroidery machines, printers, and devices to connect to this server</Typography>
+                </Box>
+
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={5}>
+                    <QueuePanel />
+                  </Grid>
+                  <Grid item xs={12} md={7}>
+                    <SetupGuide />
+                  </Grid>
+                </Grid>
+              </Box>
+            </Box>
+          </ThemeProvider>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<SetupPage />);
+    </script>
+  </body>
+</html>

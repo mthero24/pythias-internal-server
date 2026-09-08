@@ -1,14 +1,28 @@
+// Suppress DEP0174 from third-party packages (axios, got, cacache, pdf-to-printer, etc.)
+// that call util.promisify on functions with [util.promisify.custom] — harmless on Node 22+
+process.on('warning', w => { if (w.code === 'DEP0174') return; });
+
 import { app, BrowserWindow, ipcMain, Tray, Menu, autoUpdater } from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import os from "os";
-import pkg from "pdf-to-printer";
+import { execFile as _execFile } from "node:child_process";
+import { promisify } from "node:util";
+const execFile = promisify(_execFile);
 
-let {print} = pkg
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+let _sumatra = path.join(__dirname, "../node_modules/pdf-to-printer/dist/SumatraPDF-3.4.6-32.exe");
+if (_sumatra.includes("app.asar")) _sumatra = _sumatra.replace("app.asar", "app.asar.unpacked");
+
+async function print(filePath, { printer } = {}) {
+  const args = printer ? ["-print-to", printer] : ["-print-to-default"];
+  args.push("-silent", filePath);
+  await execFile(_sumatra, args);
+}
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
   app.quit();

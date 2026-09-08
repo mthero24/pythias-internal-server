@@ -25,6 +25,11 @@
               </a>
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+              <Tooltip title="Setup Guide">
+                <IconButton href={`/setup?key=${key}`} size="large" sx={{ color: '#1a1a1a' }}>
+                  <i className="fa-solid fa-book-open" style={{ fontSize: '1.1rem' }} />
+                </IconButton>
+              </Tooltip>
               <Tooltip title="Settings">
                 <IconButton href={`/settings?key=${key}`} size="large" sx={{ color: '#1a1a1a' }}>
                   <i className="fa-solid fa-gear" style={{ fontSize: '1.1rem' }} />

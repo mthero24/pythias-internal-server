@@ -5,9 +5,9 @@ const path = require('path');
 module.exports = {
   packagerConfig: {
     asar: true,
-    tmpdir: 'C:\\forge-tmp',
+    tmpdir: 'C:\\forge-tmp\\internal-server',
     icon: path.join(__dirname, "./src/public/pythias-logo-new-gold-black-bg.ico"),
-    ignore: [/\.d\.ts$/, /\.d\.ts\.map$/, /\.map\.js$/, /node_modules\/.cache/],
+    ignore: [/\.d\.ts$/, /\.d\.ts\.map$/, /\.map\.js$/, /node_modules\/.cache/, /node_modules\/@ampproject/],
   },
   rebuildConfig: {},
   makers: [

@@ -6,7 +6,7 @@ import { app } from "electron";
 const settingsDir = os.homedir() + "/Documents/pythias/";
 const settingsPath = settingsDir + "settings.json";
 
-const defaultSettings = { shipping: { scales: {}, printers: {} }, emb: {}, dtf: {}, roq: {}, labelPrinters: {}, sublimation: {}, dtgPrinters: {} };
+const defaultSettings = { shipping: { scales: {}, printers: {} }, emb: {}, dtf: {}, roq: {}, labelPrinters: {}, picklistPrinters: {}, sublimation: {}, dtgPrinters: {}, gtx: { host: "localhost" }, synergy: { host: "localhost", port: "8001" }, tajima: { spoolerPort: 9050, ftpPort: 2121, machines: ["default"], ipMap: {} } };
 
 fs.mkdirSync(settingsDir, { recursive: true });
 

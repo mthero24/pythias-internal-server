@@ -4,6 +4,7 @@ const router = express.Router();
 import {getOutput} from "../functions/output.js"
 import {getSettings, updateSettings} from "../functions/settings.js"
 import { getKeys, login, newUser, checkIfUsers, generateApiKey } from "../functions/user.js";
+import { setMachineIPMap } from "../functions/tajimaSpooler.js";
 /* 
     {
         key: encripted string
@@ -32,6 +33,10 @@ router.get("/settings", async (req,res)=>{
     res.render("settings", {settings: settings, key: req.query.key});
       
 })
+router.get("/setup", async (req, res) => {
+    const settings = await getSettings();
+    res.render("setup", { key: req.query.key || '', localIP: process.env.localIP || '' });
+})
 router.get("/account", (req,res)=>{
     if (!req.query.key || !activeKeys.filter((k) => k.key == req.query.key)[0]) return res.redirect("/login");
     let key = activeKeys.filter((k) => k.key == req.query.key)[0];
@@ -58,6 +63,8 @@ router.post("/update-settings", async (req,res)=>{
     let key = activeKeys.filter((k) => k.key == req.body.key)[0];
     key.lastUsed = Date.now();
     let newSettings = await updateSettings(req.body.settings)
+    // keep Tajima IP map in sync whenever settings are saved
+    if (req.body.settings?.tajima?.ipMap) setMachineIPMap(req.body.settings.tajima.ipMap);
     res.send({error: false})
 })
 router.post("/login", async (req, res) => {
