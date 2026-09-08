@@ -64,14 +64,15 @@
       }
 
       const SECTIONS = [
-        { title: 'Shipping Printers', icon: 'fa-truck', path: ['shipping', 'printers'], prefix: 'printer', placeholder: 'IP address (e.g. 192.168.1.10)' },
+        { title: 'Shipping Printers', icon: 'fa-truck', path: ['shipping', 'printers'], prefix: 'station', placeholder: 'IP address of the station PC (e.g. 192.168.1.10)' },
         { title: 'Shipping Scales',   icon: 'fa-weight-hanging', path: ['shipping', 'scales'],   prefix: 'station', placeholder: 'IP address' },
-        { title: 'Embroidery',        icon: 'fa-scissors',     path: ['emb'],           prefix: 'head',    placeholder: 'IP address' },
-        { title: 'DTF Printers',      icon: 'fa-print',        path: ['dtf'],           prefix: 'printer', placeholder: 'IP address' },
-        { title: 'ROQ',               icon: 'fa-boxes-stacked',path: ['roq'],           prefix: 'printer', placeholder: 'IP address' },
-        { title: 'Label Printers',    icon: 'fa-tag',          path: ['labelPrinters'], prefix: 'printer', placeholder: 'IP address' },
-        { title: 'Sublimation',       icon: 'fa-droplet',      path: ['sublimation'],   prefix: 'printer', placeholder: 'IP address' },
-        { title: 'DTG Printers',      icon: 'fa-tshirt',       path: ['dtgPrinters'],   prefix: 'printer', placeholder: 'IP address' },
+        { title: 'Embroidery',        icon: 'fa-scissors',     path: ['emb'],              prefix: 'head',    placeholder: 'IP address' },
+        { title: 'DTF Printers',      icon: 'fa-print',        path: ['dtf'],              prefix: 'printer', placeholder: 'IP address' },
+        { title: 'ROQ',               icon: 'fa-boxes-stacked',path: ['roq'],              prefix: 'printer', placeholder: 'IP address' },
+        { title: 'Label Printers',    icon: 'fa-tag',          path: ['labelPrinters'],    prefix: 'printer', placeholder: 'IP address' },
+        { title: 'Picklist Printers', icon: 'fa-list-ul',      path: ['picklistPrinters'], prefix: 'printer', placeholder: 'IP address of file-writer PC' },
+        { title: 'Sublimation',       icon: 'fa-droplet',      path: ['sublimation'],      prefix: 'printer', placeholder: 'IP address' },
+        { title: 'DTG Printers',      icon: 'fa-tshirt',       path: ['dtgPrinters'],      prefix: 'printer', placeholder: 'IP address' },
       ];
 
       function SettingSection({ section, entries, onAdd, onEdit, onDelete }) {
@@ -180,6 +181,50 @@
         );
       }
 
+      function DigitalLineSection({ values, onChange }) {
+        const [host, setHost] = useState(values.host || '');
+        const [port, setPort] = useState(values.port || '8001');
+
+        const commit = () => onChange({ host: host.trim(), port: port.trim() });
+
+        return (
+          <Card sx={{ bgcolor: '#1a1a1a', border: '1px solid #2a2a2a', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <CardHeader
+              avatar={<i className="fa-solid fa-desktop" style={{ color: '#fedd94', fontSize: '1rem', width: 20, textAlign: 'center' }} />}
+              title={<Typography variant="subtitle1" sx={{ fontWeight: 600, color: '#f0f0f0' }}>Digital Line</Typography>}
+              sx={{ pb: 0, borderBottom: '1px solid #2a2a2a' }}
+            />
+            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, pt: 1.5 }}>
+              <TextField
+                size="small"
+                label="Host IP"
+                placeholder="192.168.1.38"
+                value={host}
+                onChange={(e) => setHost(e.target.value)}
+                onBlur={commit}
+                onKeyDown={(e) => e.key === 'Enter' && commit()}
+                fullWidth
+                sx={{ '& .MuiOutlinedInput-root': { '&.Mui-focused fieldset': { borderColor: '#fedd94' } } }}
+              />
+              <TextField
+                size="small"
+                label="Port"
+                placeholder="8001"
+                value={port}
+                onChange={(e) => setPort(e.target.value)}
+                onBlur={commit}
+                onKeyDown={(e) => e.key === 'Enter' && commit()}
+                fullWidth
+                sx={{ '& .MuiOutlinedInput-root': { '&.Mui-focused fieldset': { borderColor: '#fedd94' } } }}
+              />
+              <Typography variant="caption" sx={{ color: '#555' }}>
+                Brown Mfg Digital Line — bulk items queued via AddToQueue at host:port
+              </Typography>
+            </CardContent>
+          </Card>
+        );
+      }
+
       function SettingsPage() {
         const [settings, setSettings] = useState(window._settings);
         const [saving, setSaving] = useState(false);
@@ -256,6 +301,16 @@
                     />
                   </Grid>
                 ))}
+                <Grid item xs={12} sm={6} lg={4}>
+                  <DigitalLineSection
+                    values={settings.synergy || { host: 'localhost', port: '8001' }}
+                    onChange={(val) => {
+                      const updated = setAtPath(settings, ['synergy'], val);
+                      setSettings(updated);
+                      saveToServer(updated);
+                    }}
+                  />
+                </Grid>
               </Grid>
             </Box>
 
