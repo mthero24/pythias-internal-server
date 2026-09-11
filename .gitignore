@@ -58,8 +58,6 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
-.env.test
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -95,7 +93,6 @@ src/logs.json
 src/users.json
 src/apikeys.json
 src/settings.json
-.env
 
 # Build output
 .forge-tmp/
@@ -103,3 +100,4 @@ out/
 
 # Per-machine runtime config (written to ~/Documents/pythias/)
 src/settings.json
+config.bat
